@@ -13,6 +13,7 @@ import io.opentelemetry.api.common.AttributeKey
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.Tracer
 import io.opentelemetry.context.Context
+import io.opentelemetry.context.Scope
 import java.util.concurrent.atomic.AtomicReference
 
 class ActivityTracer private constructor(builder: Builder) {
@@ -23,6 +24,7 @@ class ActivityTracer private constructor(builder: Builder) {
     private val appStartupTimer: AppStartupTimer = builder.appStartupTimer
     private val activeSpan: ActiveSpan = builder.activeSpan
     private var sessionSpan: Span? = null
+    private var sessionScope: Scope? = null
 
     fun startSpanIfNoneInProgress(spanName: String): ActivityTracer = apply {
         if (activeSpan.spanInProgress()) {
@@ -61,11 +63,13 @@ class ActivityTracer private constructor(builder: Builder) {
         // do this after the span is started, so we can override the default screen.name set by the
         // RumAttributeAppender.
         span.setAttribute(RumConstants.SCREEN_NAME_KEY, screenName)
+        sessionScope = span.makeCurrent()
         sessionSpan = span
     }
 
     fun stopActivitySessionSpan(): ActivityTracer = apply {
         sessionSpan?.end()
+        sessionScope?.close()
     }
 
     fun initiateRestartSpanIfNecessary(multiActivityApp: Boolean): ActivityTracer {
