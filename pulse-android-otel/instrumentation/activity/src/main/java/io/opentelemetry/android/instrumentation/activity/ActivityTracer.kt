@@ -2,208 +2,188 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+package io.opentelemetry.android.instrumentation.activity
 
-package io.opentelemetry.android.instrumentation.activity;
+import android.app.Activity
+import io.opentelemetry.android.common.RumConstants
+import io.opentelemetry.android.instrumentation.activity.startup.AppStartupTimer
+import io.opentelemetry.android.instrumentation.common.ActiveSpan
+import io.opentelemetry.android.internal.services.visiblescreen.VisibleScreenTracker
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.Tracer
+import io.opentelemetry.context.Context
+import java.util.concurrent.atomic.AtomicReference
 
-import static io.opentelemetry.android.common.RumConstants.APP_START_SPAN_NAME;
-import static io.opentelemetry.android.common.RumConstants.SCREEN_NAME_KEY;
-import static io.opentelemetry.android.common.RumConstants.START_TYPE_KEY;
+class ActivityTracer private constructor(builder: Builder) {
+    private val initialAppActivity: AtomicReference<String> = builder.initialAppActivity
+    private val tracer: Tracer = builder.tracer
+    private val activityName: String = builder.activityName
+    val screenName: String? = builder.screenName
+    private val appStartupTimer: AppStartupTimer = builder.appStartupTimer
+    private val activeSpan: ActiveSpan = builder.activeSpan
 
-import android.app.Activity;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import io.opentelemetry.android.instrumentation.activity.startup.AppStartupTimer;
-import io.opentelemetry.android.instrumentation.common.ActiveSpan;
-import io.opentelemetry.android.internal.services.visiblescreen.VisibleScreenTracker;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanBuilder;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Context;
-import java.util.concurrent.atomic.AtomicReference;
-
-public class ActivityTracer {
-    static final AttributeKey<String> ACTIVITY_NAME_KEY = AttributeKey.stringKey("activity.name");
-
-    private final AtomicReference<String> initialAppActivity;
-    private final Tracer tracer;
-    private final String activityName;
-    private final String screenName;
-    private final AppStartupTimer appStartupTimer;
-    private final ActiveSpan activeSpan;
-
-    private ActivityTracer(Builder builder) {
-        this.initialAppActivity = builder.initialAppActivity;
-        this.tracer = builder.tracer;
-        this.activityName = builder.getActivityName();
-        this.screenName = builder.screenName;
-        this.appStartupTimer = builder.appStartupTimer;
-        this.activeSpan = builder.activeSpan;
-    }
-
-    ActivityTracer startSpanIfNoneInProgress(String spanName) {
+    fun startSpanIfNoneInProgress(spanName: String): ActivityTracer {
         if (activeSpan.spanInProgress()) {
-            return this;
+            return this
         }
-        activeSpan.startSpan(() -> createSpan(spanName));
-        return this;
+        activeSpan.startSpan { createSpan(spanName) }
+        return this
     }
 
-    ActivityTracer startActivityCreation() {
-        activeSpan.startSpan(this::makeCreationSpan);
-        return this;
+    fun startActivityCreation(): ActivityTracer {
+        activeSpan.startSpan { this.makeCreationSpan() }
+        return this
     }
 
-    private Span makeCreationSpan() {
+    private fun makeCreationSpan(): Span {
         // If the application has never loaded an activity, or this is the initial activity getting
         // re-created,
         // we name this span specially to show that it's the application starting up. Otherwise, use
         // the activity class name as the base of the span name.
-        boolean isColdStart = initialAppActivity.get() == null;
+        val isColdStart = initialAppActivity.get() == null
         if (isColdStart) {
-            return createSpanWithParent("Created", appStartupTimer.getStartupSpan());
+            return createSpanWithParent("Created", appStartupTimer.getStartupSpan())
         }
-        if (activityName.equals(initialAppActivity.get())) {
-            return createAppStartSpan("warm");
+        if (activityName == initialAppActivity.get()) {
+            return createAppStartSpan("warm")
         }
-        return createSpan("Created");
+        return createSpan("Created")
     }
 
-    ActivityTracer initiateRestartSpanIfNecessary(boolean multiActivityApp) {
+    fun initiateRestartSpanIfNecessary(multiActivityApp: Boolean): ActivityTracer {
         if (activeSpan.spanInProgress()) {
-            return this;
+            return this
         }
-        activeSpan.startSpan(() -> makeRestartSpan(multiActivityApp));
-        return this;
+        activeSpan.startSpan { makeRestartSpan(multiActivityApp) }
+        return this
     }
 
-    @NonNull
-    private Span makeRestartSpan(boolean multiActivityApp) {
+    private fun makeRestartSpan(multiActivityApp: Boolean): Span {
         // restarting the first activity is a "hot" AppStart
         // Note: in a multi-activity application, navigating back to the first activity can trigger
         // this, so it would not be ideal to call it an AppStart.
-        if (!multiActivityApp && activityName.equals(initialAppActivity.get())) {
-            return createAppStartSpan("hot");
+        if (!multiActivityApp && activityName == initialAppActivity.get()) {
+            return createAppStartSpan("hot")
         }
-        return createSpan("Restarted");
+        return createSpan("Restarted")
     }
 
-    private Span createAppStartSpan(String startType) {
-        Span span = createSpan(APP_START_SPAN_NAME);
-        span.setAttribute(START_TYPE_KEY, startType);
-        return span;
+    private fun createAppStartSpan(startType: String?): Span {
+        val span = createSpan(RumConstants.APP_START_SPAN_NAME)
+        span.setAttribute(RumConstants.START_TYPE_KEY, startType)
+        return span
     }
 
-    private Span createSpan(String spanName) {
-        return createSpanWithParent(spanName, null);
+    private fun createSpan(spanName: String): Span {
+        return createSpanWithParent(spanName, null)
     }
 
-    private Span createSpanWithParent(String spanName, @Nullable Span parentSpan) {
-        final SpanBuilder spanBuilder =
-                tracer.spanBuilder(spanName).setAttribute(ACTIVITY_NAME_KEY, activityName);
+    private fun createSpanWithParent(spanName: String, parentSpan: Span?): Span {
+        val spanBuilder =
+            tracer.spanBuilder(spanName).setAttribute<String?>(ACTIVITY_NAME_KEY, activityName)
         if (parentSpan != null) {
-            spanBuilder.setParent(parentSpan.storeInContext(Context.current()));
+            spanBuilder.setParent(parentSpan.storeInContext(Context.current()))
         }
-        Span span = spanBuilder.startSpan();
+        val span = spanBuilder.startSpan()
         // do this after the span is started, so we can override the default screen.name set by the
         // RumAttributeAppender.
-        span.setAttribute(SCREEN_NAME_KEY, screenName);
-        return span;
+        span.setAttribute(RumConstants.SCREEN_NAME_KEY, screenName)
+        return span
     }
 
-    public void endSpanForActivityResumed() {
+    fun endSpanForActivityResumed() {
         if (initialAppActivity.get() == null) {
-            initialAppActivity.set(activityName);
+            initialAppActivity.set(activityName)
         }
-        endActiveSpan();
+        endActiveSpan()
     }
 
-    public void endActiveSpan() {
+    fun endActiveSpan() {
         // If we happen to be in app startup, make sure this ends it. It's harmless if we're already
         // out of the startup phase.
-        appStartupTimer.end();
-        activeSpan.endActiveSpan();
+        appStartupTimer.end()
+        activeSpan.endActiveSpan()
     }
 
-    public ActivityTracer addPreviousScreenAttribute() {
-        activeSpan.addPreviousScreenAttribute(activityName);
-        return this;
+    fun addPreviousScreenAttribute(): ActivityTracer {
+        activeSpan.addPreviousScreenAttribute(activityName)
+        return this
     }
 
-    public ActivityTracer addEvent(String eventName) {
-        activeSpan.addEvent(eventName);
-        return this;
+    fun addEvent(eventName: String?): ActivityTracer {
+        activeSpan.addEvent(eventName)
+        return this
     }
 
-    static Builder builder(Activity activity) {
-        return new Builder(activity);
+    internal class Builder(private val activity: Activity) {
+        var screenName: String = "unknown_screen"
+            private set
+
+        var initialAppActivity: AtomicReference<String> = AtomicReference()
+            private set
+
+        var tracer: Tracer = INVALID_TRACER
+            private set
+
+        var appStartupTimer: AppStartupTimer = INVALID_TIMER
+            private set
+
+        var activeSpan: ActiveSpan = INVALID_ACTIVE_SPAN
+            private set
+
+
+        fun setVisibleScreenTracker(visibleScreenTracker: VisibleScreenTracker) = apply {
+            this.activeSpan = ActiveSpan(visibleScreenTracker::previouslyVisibleScreen)
+        }
+
+        fun setInitialAppActivity(activityName: String) = apply {
+            initialAppActivity.set(activityName)
+        }
+
+        fun setInitialAppActivity(initialAppActivity: AtomicReference<String>) = apply {
+            this.initialAppActivity = initialAppActivity
+        }
+
+        fun setTracer(tracer: Tracer) = apply {
+            this.tracer = tracer
+        }
+
+        fun setAppStartupTimer(appStartupTimer: AppStartupTimer) = apply {
+            this.appStartupTimer = appStartupTimer
+        }
+
+        fun setActiveSpan(activeSpan: ActiveSpan) = apply {
+            this.activeSpan = activeSpan
+        }
+
+        val activityName: String
+            get() = activity.javaClass.simpleName
+
+        fun setScreenName(screenName: String) = apply {
+            this.screenName = screenName
+        }
+
+        fun build(): ActivityTracer {
+            check(activeSpan !== INVALID_ACTIVE_SPAN) { "activeSpan must be configured." }
+            check(tracer !== INVALID_TRACER) { "tracer must be configured." }
+            check(appStartupTimer !== INVALID_TIMER) { "appStartupTimer must be configured." }
+            return ActivityTracer(this)
+        }
+
+        companion object {
+            private val INVALID_ACTIVE_SPAN = ActiveSpan { null }
+            private val INVALID_TRACER = Tracer { spanName: String? -> null }
+            private val INVALID_TIMER = AppStartupTimer()
+        }
     }
 
-    static class Builder {
-        private static final ActiveSpan INVALID_ACTIVE_SPAN = new ActiveSpan(() -> null);
-        private static final Tracer INVALID_TRACER = spanName -> null;
-        private static final AppStartupTimer INVALID_TIMER = new AppStartupTimer();
-        private final Activity activity;
-        public String screenName = "unknown_screen";
-        private AtomicReference<String> initialAppActivity = new AtomicReference<>();
-        private Tracer tracer = INVALID_TRACER;
-        private AppStartupTimer appStartupTimer = INVALID_TIMER;
-        private ActiveSpan activeSpan = INVALID_ACTIVE_SPAN;
+    companion object {
+        @JvmStatic
+        val ACTIVITY_NAME_KEY: AttributeKey<String?> = AttributeKey.stringKey("activity.name")
 
-        public Builder(Activity activity) {
-            this.activity = activity;
-        }
-
-        public Builder setVisibleScreenTracker(VisibleScreenTracker visibleScreenTracker) {
-            this.activeSpan = new ActiveSpan(visibleScreenTracker::getPreviouslyVisibleScreen);
-            return this;
-        }
-
-        public Builder setInitialAppActivity(String activityName) {
-            initialAppActivity.set(activityName);
-            return this;
-        }
-
-        public Builder setInitialAppActivity(AtomicReference<String> initialAppActivity) {
-            this.initialAppActivity = initialAppActivity;
-            return this;
-        }
-
-        public Builder setTracer(Tracer tracer) {
-            this.tracer = tracer;
-            return this;
-        }
-
-        public Builder setAppStartupTimer(AppStartupTimer appStartupTimer) {
-            this.appStartupTimer = appStartupTimer;
-            return this;
-        }
-
-        public Builder setActiveSpan(ActiveSpan activeSpan) {
-            this.activeSpan = activeSpan;
-            return this;
-        }
-
-        private String getActivityName() {
-            return activity.getClass().getSimpleName();
-        }
-
-        public Builder setScreenName(String screenName) {
-            this.screenName = screenName;
-            return this;
-        }
-
-        public ActivityTracer build() {
-            if (activeSpan == INVALID_ACTIVE_SPAN) {
-                throw new IllegalStateException("activeSpan must be configured.");
-            }
-            if (tracer == INVALID_TRACER) {
-                throw new IllegalStateException("tracer must be configured.");
-            }
-            if (appStartupTimer == INVALID_TIMER) {
-                throw new IllegalStateException("appStartupTimer must be configured.");
-            }
-            return new ActivityTracer(this);
+        internal fun builder(activity: Activity): Builder {
+            return Builder(activity)
         }
     }
 }

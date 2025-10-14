@@ -2,58 +2,44 @@
  * Copyright The OpenTelemetry Authors
  * SPDX-License-Identifier: Apache-2.0
  */
+package io.opentelemetry.android.instrumentation.activity
 
-package io.opentelemetry.android.instrumentation.activity;
+import android.app.Activity
+import android.os.Bundle
+import io.opentelemetry.android.internal.services.visiblescreen.activities.DefaultingActivityLifecycleCallbacks
 
-import android.app.Activity;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import io.opentelemetry.android.internal.services.visiblescreen.activities.DefaultingActivityLifecycleCallbacks;
-
-public class Pre29ActivityCallbacks implements DefaultingActivityLifecycleCallbacks {
-    private final ActivityTracerCache tracers;
-
-    public Pre29ActivityCallbacks(ActivityTracerCache tracers) {
-        this.tracers = tracers;
+class Pre29ActivityCallbacks(private val tracers: ActivityTracerCache) :
+    DefaultingActivityLifecycleCallbacks {
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        tracers.startActivityCreation(activity).addEvent("activityCreated")
     }
 
-    @Override
-    public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-        tracers.startActivityCreation(activity).addEvent("activityCreated");
+    override fun onActivityStarted(activity: Activity) {
+        tracers.initiateRestartSpanIfNecessary(activity).addEvent("activityStarted")
     }
 
-    @Override
-    public void onActivityStarted(@NonNull Activity activity) {
-        tracers.initiateRestartSpanIfNecessary(activity).addEvent("activityStarted");
-    }
-
-    @Override
-    public void onActivityResumed(@NonNull Activity activity) {
+    override fun onActivityResumed(activity: Activity) {
         tracers.startSpanIfNoneInProgress(activity, "Resumed")
-                .addEvent("activityResumed")
-                .addPreviousScreenAttribute()
-                .endSpanForActivityResumed();
+            .addEvent("activityResumed")
+            .addPreviousScreenAttribute()
+            .endSpanForActivityResumed()
     }
 
-    @Override
-    public void onActivityPaused(@NonNull Activity activity) {
+    override fun onActivityPaused(activity: Activity) {
         tracers.startSpanIfNoneInProgress(activity, "Paused")
-                .addEvent("activityPaused")
-                .endActiveSpan();
+            .addEvent("activityPaused")
+            .endActiveSpan()
     }
 
-    @Override
-    public void onActivityStopped(@NonNull Activity activity) {
+    override fun onActivityStopped(activity: Activity) {
         tracers.startSpanIfNoneInProgress(activity, "Stopped")
-                .addEvent("activityStopped")
-                .endActiveSpan();
+            .addEvent("activityStopped")
+            .endActiveSpan()
     }
 
-    @Override
-    public void onActivityDestroyed(@NonNull Activity activity) {
+    override fun onActivityDestroyed(activity: Activity) {
         tracers.startSpanIfNoneInProgress(activity, "Destroyed")
-                .addEvent("activityDestroyed")
-                .endActiveSpan();
+            .addEvent("activityDestroyed")
+            .endActiveSpan()
     }
 }
