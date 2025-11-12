@@ -92,6 +92,25 @@ internal class SlowRenderListener(
     }
 
     companion object {
+        internal var totalUndroppedFrames: Long = 0
+        internal var totalDroppedFrames: Long = 0
+        internal var slowFrames: Long = 0
+        internal var frozenFrames: Long = 0
+
+        internal data class CumulativeFrameData(
+            val totalUndroppedFrameCount: Long,
+            val totalDroppedFrameCount: Long,
+            val slowFrameCount: Long,
+            val frozenFrameCount: Long,
+        )
+
+        internal fun createCumulativeFrameMetric() = CumulativeFrameData(
+            totalUndroppedFrameCount = totalUndroppedFrames,
+            totalDroppedFrameCount = totalDroppedFrames,
+            slowFrameCount = slowFrames,
+            frozenFrameCount = frozenFrames,
+        )
+
         private val frameMetricsThread = HandlerThread("FrameMetricsCollector")
 
         private fun startFrameMetricsLoop(): Looper {
