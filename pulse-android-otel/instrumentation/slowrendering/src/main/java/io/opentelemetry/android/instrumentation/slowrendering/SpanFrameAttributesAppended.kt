@@ -45,11 +45,11 @@ class SpanFrameAttributesAppended : ExtendedSpanProcessor {
             return Attributes.builder().apply {
                 put(
                     "app.interaction.analysed_frame_count",
-                    second.totalUndroppedFrameCount - first.totalUndroppedFrameCount
+                    second.analysedFrameCount - first.analysedFrameCount
                 )
                 put(
                     "app.interaction.unanalysed_frame_count",
-                    second.totalDroppedFrameCount - first.totalDroppedFrameCount
+                    second.unanalysedFrameCount - first.unanalysedFrameCount
                 )
                 put(
                     "app.interaction.slow_frame_count",
