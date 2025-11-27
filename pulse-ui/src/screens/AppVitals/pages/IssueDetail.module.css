@@ -1,0 +1,39 @@
+.pageContainer {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    rgba(248, 250, 252, 1) 0%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(248, 253, 252, 1) 100%
+  );
+  padding: var(--mantine-spacing-md);
+}
+
+.backButton {
+  margin-bottom: var(--mantine-spacing-md);
+  font-weight: 600;
+}
+
+.notFoundCard {
+  background: linear-gradient(145deg, #ffffff 0%, #fafbfc 100%);
+  border: 1px solid rgba(14, 201, 194, 0.08);
+  border-radius: 12px;
+  padding: var(--mantine-spacing-xl);
+  box-shadow: 0 2px 8px rgba(14, 201, 194, 0.04);
+  text-align: center;
+  max-width: 500px;
+  margin: 100px auto;
+}
+
+.notFoundTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ef4444;
+  margin-bottom: var(--mantine-spacing-sm);
+}
+
+.notFoundText {
+  font-size: 14px;
+  color: var(--mantine-color-dimmed);
+  line-height: 1.6;
+}

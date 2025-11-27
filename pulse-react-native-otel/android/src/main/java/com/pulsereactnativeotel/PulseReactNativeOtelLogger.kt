@@ -1,7 +1,5 @@
 package com.pulsereactnativeotel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
@@ -15,7 +13,6 @@ object PulseReactNativeOtelLogger {
         properties: ReadableMap?
     ) {
         val params = buildMap {
-            put(PulseOtelConstants.ATTR_PLATFORM, PulseOtelConstants.PLATFORM_REACT_NATIVE)
             properties?.let { putAll(it.toMap()) }
         }
 
@@ -35,7 +32,6 @@ object PulseReactNativeOtelLogger {
             put(PulseOtelConstants.ATTR_ERROR_FATAL, isFatal)
             put(PulseOtelConstants.ATTR_ERROR_MESSAGE, errorMessage)
             put(PulseOtelConstants.ATTR_ERROR_STACK, stackTrace)
-            put(PulseOtelConstants.ATTR_PLATFORM, PulseOtelConstants.PLATFORM_REACT_NATIVE)
             put(PulseOtelConstants.ATTR_THREAD_ID, getCurrentThreadId())
             put(PulseOtelConstants.ATTR_THREAD_NAME, Thread.currentThread().name)
             put(PulseOtelConstants.ATTR_ERROR_SOURCE, PulseOtelConstants.ERROR_SOURCE_JS)
@@ -46,18 +42,9 @@ object PulseReactNativeOtelLogger {
     }
 
     private fun getCurrentThreadId(): String {
-        val currentThread = Thread.currentThread()
-
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-            getThreadIdApi36(currentThread)
-        } else {
-            @Suppress("DEPRECATION")
-            currentThread.id.toString()
-        }
+        @Suppress("DEPRECATION")
+        return Thread.currentThread().id.toString()
     }
-
-    @RequiresApi(Build.VERSION_CODES.BAKLAVA)
-    private fun getThreadIdApi36(thread: Thread): String = thread.threadId().toString()
 
     private fun ReadableMap.toMap(): Map<String, Any?> = buildMap {
         entryIterator.forEach { (key, value) ->

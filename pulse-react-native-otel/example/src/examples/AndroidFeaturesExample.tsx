@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import PulseReactNativeOtel from '../../../src/NativePulseReactNativeOtel';
+import FrozenFrameStressTest from './FrozenFrameStressTest';
 
 export default function AndroidFeaturesExample() {
+  const [showStressTest, setShowStressTest] = useState(false);
+
   const triggerANR = () => {
     Alert.alert(
       'ANR Test',
@@ -23,6 +27,17 @@ export default function AndroidFeaturesExample() {
     );
   };
 
+  if (showStressTest) {
+    return (
+      <View style={styles.fullScreen}>
+        <View style={styles.backButton}>
+          <Button title="← Back" onPress={() => setShowStressTest(false)} color="#666" />
+        </View>
+        <FrozenFrameStressTest />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>🤖 Android Features</Text>
@@ -33,6 +48,14 @@ export default function AndroidFeaturesExample() {
           title="Trigger ANR"
           onPress={triggerANR}
           color="#F44336"
+        />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Frozen Frame Stress Test"
+          onPress={() => setShowStressTest(true)}
+          color="#FF9800"
         />
       </View>
     </View>
@@ -46,6 +69,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
     backgroundColor: '#fff',
+  },
+  fullScreen: {
+    flex: 1,
+  },
+  backButton: {
+    padding: 8,
+    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,

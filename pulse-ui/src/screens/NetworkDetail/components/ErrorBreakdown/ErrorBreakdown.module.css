@@ -1,0 +1,80 @@
+.container {
+  background: #ffffff;
+  border: 1px solid rgba(14, 201, 194, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.container:hover {
+  border-color: rgba(14, 201, 194, 0.25);
+  box-shadow: 0 2px 8px rgba(14, 201, 194, 0.08);
+}
+
+.errorList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.errorCard {
+  padding: 12px 14px;
+  background: rgba(14, 201, 194, 0.02);
+  border: 1px solid rgba(14, 201, 194, 0.08);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.errorCard:hover {
+  background: rgba(14, 201, 194, 0.03);
+  border-color: rgba(14, 201, 194, 0.15);
+}
+
+.codeBadge {
+  font-weight: 600;
+  font-size: 12px;
+  padding: 4px 10px;
+  min-width: 50px;
+  justify-content: center;
+  opacity: 0.85;
+}
+
+.errorName {
+  color: #2c3e50;
+  font-size: 13px;
+}
+
+.errorDescription {
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 2px;
+  max-width: 600px;
+}
+
+.statsBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 70px;
+}
+
+.progressBar {
+  margin-top: 6px;
+}
+
+.summary {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(14, 201, 194, 0.1);
+}
+
+@media (max-width: 768px) {
+  .errorDescription {
+    max-width: 100%;
+  }
+
+  .statsBox {
+    min-width: 60px;
+  }
+}

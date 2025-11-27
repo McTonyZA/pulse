@@ -75,7 +75,7 @@ class PulseReactNativeOtelModule(reactContext: ReactApplicationContext) :
   override fun triggerAnr() {
     Handler(Looper.getMainLooper()).postAtFrontOfQueue {
       Log.d("[Pulse]", "Now running PostAtFrontQueue: ${Thread.currentThread().name}")
-      Thread.sleep(20_000)
+      Thread.sleep(10_000)
     }
   }
 

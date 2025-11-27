@@ -1,0 +1,38 @@
+export enum SpanType {
+  INTERACTION = "interaction",
+  SCREEN_SESSION = "screen_session",
+  SCREEN_LOAD = "screen_load",
+  NAVIGATION = "navigation",
+  APP_START = "app_start",
+  SCREEN_NAME = "screen.name",
+}
+
+export enum STATUS_CODE {
+  UN_SET = "Unset",
+  ERROR = "Error",
+  OK = "Ok",
+}
+export enum COLUMN_NAME {
+  DEVICE_MODEL = "DeviceModel",
+  NETWORK_PROVIDER = "NetworkProvider",
+  OS_VERSION = "OsVersion",
+  PLATFORM = "Platform",
+  STATE = "GeoState",
+  COUNTRY = "GeoCountry",
+  APP_VERSION = "AppVersion",
+  DURATION = "Duration",
+  USER_ID = "UserId",
+  TIMESTAMP = "Timestamp",
+  SPAN_ID = "SpanId", 
+  TRACE_ID = "TraceId",
+  SESSION_ID = "SessionId",
+  SPAN_TYPE = "SpanType",
+  SPAN_NAME = "SpanName",
+  DEVICE_MANUFACTURER = "device.manufacturer",
+  OS_TYPE = "os.type",
+  OS_DESCRIPTION = "os.description",
+  FROZEN_FRAME_COUNT = "app.interaction.frozen_frame_count",
+  IS_ERROR = "isError",
+  EVENTS_NAME = "Events.Name",
+  EVENTS_TIMESTAMP = "Events.Timestamp",
+}

@@ -20,7 +20,7 @@ object InteractionFakeUtils {
         return InteractionConfig(
             id = id,
             name = name,
-            eventSequence = eventSequence,
+            events = eventSequence,
             globalBlacklistedEvents = globalBlacklistedEvents,
             uptimeLowerLimitInMs = uptimeLowerLimitInNano / 1000_000,
             uptimeMidLimitInMs = uptimeMidLimitInNano / 1000_000,

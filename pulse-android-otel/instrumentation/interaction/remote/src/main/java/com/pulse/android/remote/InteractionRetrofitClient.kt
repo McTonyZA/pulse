@@ -30,4 +30,8 @@ public class InteractionRetrofitClient(
     public val apiService: InteractionApiService by lazy {
         retrofit.create(InteractionApiService::class.java)
     }
+
+    public fun newInstance(url: String): InteractionRetrofitClient {
+        return InteractionRetrofitClient(url, json, okhttpClient)
+    }
 }

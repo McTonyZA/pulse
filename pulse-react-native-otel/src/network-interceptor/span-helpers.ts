@@ -6,37 +6,26 @@ import type {
 import type { Span } from '../index';
 import { Pulse, SpanStatusCode } from '../index';
 import type { PulseAttributes } from '../pulse.interface';
+import { extractHttpAttributes } from './url-helper';
 
 export function setNetworkSpanAttributes(
   span: Span,
   startContext: RequestStartContext,
   endContext: RequestEndContext
 ): PulseAttributes {
-  let urlObj: URL | null = null;
-  try {
-    urlObj = new URL(startContext.url);
-  } catch (e) {
-    // URL might be relative or invalid, continue without parsing
-  }
-
   const method = startContext.method.toUpperCase();
-  const attributes: PulseAttributes = {
+  let attributes: PulseAttributes = {
     'http.method': method,
     'http.url': startContext.url,
-    'pulse.type': 'network',
+    'pulse.type': `network.${endContext.status ?? 0}`,
     'http.request.type': startContext.type,
     'platform': Platform.OS as 'android' | 'ios' | 'web',
   };
 
-  if (urlObj) {
-    attributes['http.scheme'] = urlObj.protocol.replace(':', '');
-    attributes['http.host'] = urlObj.hostname;
-    attributes['http.target'] = urlObj.pathname + urlObj.search;
-    if (urlObj.port) {
-      attributes['net.peer.port'] = parseInt(urlObj.port, 10);
-    }
-    attributes['net.peer.name'] = urlObj.hostname;
-  }
+  // We had implemented our own URL parsing helper to avoid errors on RN < 0.80. Since this is not supported by React Native. 
+  // Check here: https://github.com/facebook/react-native/blob/v0.79.0/packages/react-native/Libraries/Blob/URL.js
+  const urlAttributes = extractHttpAttributes(startContext.url);
+  attributes = { ...attributes, ...urlAttributes };
 
   if (endContext.status) {
     attributes['http.status_code'] = endContext.status;

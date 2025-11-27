@@ -84,6 +84,16 @@ val ignoredModules = listOf("test-common")
 apiValidation.validationDisabled = ignoredModules.contains(project.name)
 
 val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
+        force("org.jetbrains.kotlin:kotlin-stdlib-common:2.0.21")
+        force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21")
+        force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21")
+    }
+}
+
 dependencies {
     implementation(libs.findLibrary("androidx-annotation").get())
     implementation(libs.findLibrary("findbugs-jsr305").get())

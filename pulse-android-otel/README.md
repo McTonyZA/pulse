@@ -86,7 +86,10 @@ class MainApplication : Application() {
             }
         ) {
             // Enable/disable specific instrumentations
-            interaction { enabled(true) }
+            interaction {
+                enabled(true)
+                setConfigUrl { "http://10.0.2.2:8080/v1/interactions/all-active-interactions" }
+            }
             activity { enabled(true) }
             fragment { enabled(false) }
             network { enabled(true) }
@@ -322,6 +325,7 @@ PulseSDK.INSTANCE.initialize(
     // User interactions
     interaction {
         enabled(true)
+        setConfigUrl { "http://10.0.2.2:8080/v1/interactions/all-active-interactions" }
     }
     
     // Activity lifecycle

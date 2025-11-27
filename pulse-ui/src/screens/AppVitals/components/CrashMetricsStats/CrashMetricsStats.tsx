@@ -1,0 +1,177 @@
+import { Box, Text } from "@mantine/core";
+import { useMemo } from "react";
+import { useGetDataQuery } from "../../../../hooks";
+import { useQueryError } from "../../../../hooks/useQueryError";
+import { StatsSkeleton } from "../../../../components/StatsSkeleton";
+import type { DataQueryResponse } from "../../../../hooks/useGetDataQuery/useGetDataQuery.interface";
+import classes from "./CrashMetricsStats.module.css";
+
+interface CrashMetricsStatsProps {
+  startTime: string;
+  endTime: string;
+  appVersion?: string;
+  osVersion?: string;
+  device?: string;
+  screenName?: string;
+}
+
+export function CrashMetricsStats({
+  startTime,
+  endTime,
+  appVersion = "all",
+  osVersion = "all",
+  device = "all",
+  screenName,
+}: CrashMetricsStatsProps) {
+  // Build filters array for API request
+  const filters = useMemo(() => {
+    const filterArray = [];
+
+    // Add screen name filter if provided
+    if (screenName) {
+      filterArray.push({
+        field: "ScreenName",
+        operator: "EQ" as const,
+        value: [screenName],
+      });
+    }
+
+    if (appVersion && appVersion !== "all") {
+      filterArray.push({
+        field: "AppVersionCode",
+        operator: "EQ" as const,
+        value: [appVersion],
+      });
+    }
+
+    if (osVersion && osVersion !== "all") {
+      filterArray.push({
+        field: "OsVersion",
+        operator: "EQ" as const,
+        value: [osVersion],
+      });
+    }
+
+    if (device && device !== "all") {
+      filterArray.push({
+        field: "DeviceModel",
+        operator: "EQ" as const,
+        value: [device],
+      });
+    }
+
+    return filterArray.length > 0 ? filterArray : undefined;
+  }, [appVersion, osVersion, device, screenName]);
+
+  const queryResult = useGetDataQuery({
+    requestBody: {
+      dataType: "EXCEPTIONS",
+      timeRange: {
+        start: startTime,
+        end: endTime,
+      },
+      filters,
+      select: [
+        {
+          function: "CUSTOM",
+          param: {
+            expression: "uniqCombinedIf(UserId, EventName = 'device.crash')",
+          },
+          alias: "crash_users",
+        },
+        {
+          function: "CUSTOM",
+          param: {
+            expression: "uniqCombinedIf(SessionId, EventName = 'device.crash')",
+          },
+          alias: "crash_sessions",
+        },
+        {
+          function: "CUSTOM",
+          param: {
+            expression: "uniqCombined(UserId)",
+          },
+          alias: "all_users",
+        },
+        {
+          function: "CUSTOM",
+          param: {
+            expression: "uniqCombined(SessionId)",
+          },
+          alias: "all_sessions",
+        },
+      ],
+    },
+    enabled: !!startTime && !!endTime,
+  }) as ReturnType<typeof useGetDataQuery>;
+
+  const { data } = queryResult;
+  const queryState = useQueryError<DataQueryResponse>({ queryResult });
+
+  const metrics = useMemo(() => {
+    const responseData = data?.data;
+    if (!responseData || !responseData.rows || responseData.rows.length === 0) {
+      return {
+        crashFreeUsers: 0,
+        crashFreeSessions: 0,
+      };
+    }
+
+    const fields = responseData.fields;
+    const crashUsersIndex = fields.indexOf("crash_users");
+    const crashSessionsIndex = fields.indexOf("crash_sessions");
+    const allUsersIndex = fields.indexOf("all_users");
+    const allSessionsIndex = fields.indexOf("all_sessions");
+
+    const row = responseData.rows[0];
+    const crashUsers = parseFloat(row[crashUsersIndex]) || 0;
+    const crashSessions = parseFloat(row[crashSessionsIndex]) || 0;
+    const allUsers = parseFloat(row[allUsersIndex]) || 0;
+    const allSessions = parseFloat(row[allSessionsIndex]) || 0;
+
+    const crashFreeUsers =
+      allUsers > 0 ? ((allUsers - crashUsers) / allUsers) * 100 : 0;
+    const crashFreeSessions =
+      allSessions > 0 ? ((allSessions - crashSessions) / allSessions) * 100 : 0;
+
+    return {
+      crashFreeUsers: parseFloat(crashFreeUsers.toFixed(2)),
+      crashFreeSessions: parseFloat(crashFreeSessions.toFixed(2)),
+    };
+  }, [data]);
+
+  if (queryState.isLoading) {
+    return <StatsSkeleton title="Crash Metrics" itemCount={2} />;
+  }
+
+  if (queryState.isError) {
+    return (
+      <Box className={classes.statSection}>
+        <Text className={classes.sectionTitle}>Crash Metrics</Text>
+        <Text size="sm" c="red" mt="xs">
+          {queryState.errorMessage || "Failed to load crash metrics"}
+        </Text>
+      </Box>
+    );
+  }
+
+  return (
+    <Box className={`${classes.statSection} ${classes.fadeIn}`}>
+      <Text className={classes.sectionTitle}>Crash Metrics</Text>
+      <Box className={classes.metricsGrid}>
+        <Box className={classes.statItem}>
+          <Text className={classes.statLabel}>Crash-Free Users</Text>
+          <Text className={classes.statValue} c="red">
+            {`${metrics.crashFreeUsers}%`}
+          </Text>
+        </Box>
+        <Box className={classes.statItem}>
+          <Text className={classes.statLabel}>Crash-Free Sessions</Text>
+          <Text className={classes.statValue} c="red">
+            {`${metrics.crashFreeSessions}%`}
+          </Text>
+        </Box>
+      </Box>
+    </Box>
+  );
+}

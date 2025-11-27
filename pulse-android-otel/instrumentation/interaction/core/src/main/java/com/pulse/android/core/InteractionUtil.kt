@@ -45,7 +45,7 @@ internal object InteractionUtil {
                 )
             }
 
-            val configEvent = interactionConfig.eventSequence[configEventIndex]
+            val configEvent = interactionConfig.events[configEventIndex]
 
             logDebug { "localEvent:${localEvent.name} from localEventIndex = $localEventIndex," }
             val isMatch = localEvent matches configEvent
@@ -63,10 +63,10 @@ internal object InteractionUtil {
                     logDebug {
                         "localEvent:${localEvent.name} is match and not a blacklisted match, " +
                                 "matched at index = ${configEventIndex - 1}, " +
-                                "config(w/o blacklisted) = ${interactionConfig.eventSequenceSize}"
+                                "config(w/o blacklisted) = ${interactionConfig.eventsSize}"
                     }
 
-                    if (configEventIndex == interactionConfig.eventSequenceSize) {
+                    if (configEventIndex == interactionConfig.eventsSize) {
                         logDebug { "localEvent:${localEvent.name} is final match" }
                         isMatchOnGoing = false
                         MatchResult(
@@ -277,9 +277,15 @@ public data class Interaction(
 )
 
 @Suppress("UNCHECKED_CAST")
-public val Interaction.timeSpanInNanos: Pair<Long, Long>
+// TODO: Investigate why events list can be empty or have only 1 item, causing IndexOutOfBoundsException
+// Crash logs show: "Index 0 out of bounds for length 0" and "Index 1 out of bounds for length 1"
+// This safety check prevents crash but we need to understand root cause
+public val Interaction.timeSpanInNanos: Pair<Long, Long>?
     get() {
         val steps = events
+        if (steps.size < 2) {
+            return null
+        }
         return steps[0].timeInNano to steps[1].timeInNano
     }
 

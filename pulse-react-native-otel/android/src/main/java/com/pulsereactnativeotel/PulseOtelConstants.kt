@@ -3,8 +3,6 @@ package com.pulsereactnativeotel
 object PulseOtelConstants {
   const val INSTRUMENTATION_SCOPE = "com.pulsereactnativeotel"
 
-  const val ATTR_PLATFORM = "platform"
-
   const val ATTR_ERROR_FATAL = "error.fatal"
   const val ATTR_ERROR_TYPE = "exception.type"
   const val ATTR_ERROR_MESSAGE = "exception.message"

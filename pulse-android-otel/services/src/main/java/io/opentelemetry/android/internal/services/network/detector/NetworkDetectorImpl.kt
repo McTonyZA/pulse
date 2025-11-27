@@ -82,10 +82,17 @@ internal class NetworkDetectorImpl(
         }
     }
 
-    /**
-     * Builds a network for non-cellular networks.
+    /* Builds a network for non-cellular networks.
+     * Also attempts to get carrier info if available (SIM card info is available regardless of active connection type).
+     * This allows carrier attributes to be available when device has SIM card but is on WiFi.
      */
-    private fun buildNetwork(networkState: NetworkState) = CurrentNetwork(networkState)
+    private fun buildNetwork(networkState: NetworkState): CurrentNetwork {
+        val carrier = carrierFinder.get()
+        return CurrentNetwork(
+            state = networkState,
+            carrier = carrier,
+        )
+    }
 
     /**
      * Builds a cellular network with carrier and subtype information.

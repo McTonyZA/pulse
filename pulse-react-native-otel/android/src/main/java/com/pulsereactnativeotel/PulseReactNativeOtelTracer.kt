@@ -33,11 +33,6 @@ object PulseReactNativeOtelTracer {
 
         val scope = span.makeCurrent()
 
-        span.setAttribute(
-            AttributeKey.stringKey(PulseOtelConstants.ATTR_PLATFORM),
-            PulseOtelConstants.PLATFORM_REACT_NATIVE
-        )
-
         attributes?.applyTo(span)
 
         val id = UUID.randomUUID().toString()

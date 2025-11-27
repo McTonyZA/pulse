@@ -1,0 +1,17 @@
+.container {
+  padding: var(--mantine-spacing-md);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    rgba(248, 250, 252, 1) 0%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(248, 253, 252, 1) 100%
+  );
+}
+
+.backButton {
+  margin-bottom: var(--mantine-spacing-md);
+  font-weight: 600;
+}

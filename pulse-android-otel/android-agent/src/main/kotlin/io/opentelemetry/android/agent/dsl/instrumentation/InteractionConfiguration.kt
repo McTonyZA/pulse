@@ -5,6 +5,8 @@
 
 package io.opentelemetry.android.agent.dsl.instrumentation
 
+import com.pulse.android.core.config.InteractionConfigFetcher
+import com.pulse.android.core.config.InteractionConfigRestFetcher
 import io.opentelemetry.android.agent.dsl.OpenTelemetryDslMarker
 import io.opentelemetry.android.config.OtelRumConfig
 import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader
@@ -20,6 +22,26 @@ class InteractionConfiguration internal constructor(
             InteractionInstrumentation::class.java,
         )
     }
+
+    /**
+     * Configure the URL provider for the Interaction rest API. `Get` call will performed in this
+     * URL to fetch the list of interaction configs
+     * If not set, defaults to "http://10.0.2.2:8080/interaction-configs"
+     * Also see [setConfigFetcher]
+     */
+    fun setConfigUrl(urlProvider: () -> String): InteractionConfiguration = apply {
+        interactionInstrumentation.setConfigFetcher(InteractionConfigRestFetcher(urlProvider))
+    }
+
+    /**
+     * Configure the interaction config fetcher.
+     * In case not set defaults to "http://10.0.2.2:8080/interaction-configs" with [InteractionConfigRestFetcher]
+     * Also see [setConfigUrl]
+     */
+    fun setConfigFetcher(configFetcher: InteractionConfigFetcher): InteractionConfiguration =
+        apply {
+            interactionInstrumentation.setConfigFetcher(configFetcher)
+        }
 
     fun addAttributesExtractor(value: InteractionAttributesExtractor) {
         interactionInstrumentation.addAttributesExtractor(value)

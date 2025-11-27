@@ -3,8 +3,8 @@
 
 package com.pulse.android.core
 
+import com.pulse.android.core.config.InteractionConfigFetcher
 import com.pulse.android.core.utils.InteractionFakeUtils
-import com.pulse.android.remote.InteractionApiService
 import com.pulse.android.remote.models.InteractionAttrsEntry
 import com.pulse.android.remote.models.InteractionConfig
 import io.mockk.coEvery
@@ -33,7 +33,7 @@ class InteractionManagerTest {
     private lateinit var mockInteractionManager: InteractionManager
 
     @MockK
-    lateinit var mockApiService: InteractionApiService
+    lateinit var mockConfigFetcher: InteractionConfigFetcher
 
     private val standardTestDispatcher =
         StandardTestDispatcher(name = "InteractionManagerTest\$standardTestDispatcher")
@@ -42,22 +42,16 @@ class InteractionManagerTest {
     @BeforeEach
     fun init() {
         mockInteractionManager = InteractionManager(
-            mockApiService,
+            mockConfigFetcher,
             standardTestDispatcher,
             standardTestDispatcher
         )
     }
 
     @Test
-    fun `Calling instance gives non null instance`() = runTest {
-        val interactionManager = InteractionManager.instance
-        Assertions.assertThat(interactionManager).isNotNull
-    }
-
-    @Test
     fun `When interaction init is not done interactionTrackers should be null`() =
         runTest(standardTestDispatcher) {
-            coEvery { mockApiService.getInteractions() } returns emptyList()
+            coEvery { mockConfigFetcher.getConfigs() } returns emptyList()
             advanceUntilIdle()
             Assertions.assertThat(mockInteractionManager.interactionTrackers).isNull()
         }
@@ -65,7 +59,7 @@ class InteractionManagerTest {
     @Test
     fun `When interactions are empty interaction trackers should be empty`() =
         runTest(standardTestDispatcher) {
-            coEvery { mockApiService.getInteractions() } returns emptyList()
+            coEvery { mockConfigFetcher.getConfigs() } returns emptyList()
             mockInteractionManager.init()
             advanceUntilIdle()
             Assertions.assertThat(mockInteractionManager.interactionTrackers).isEmpty()
@@ -74,7 +68,7 @@ class InteractionManagerTest {
     @Test
     fun `When interaction is one interaction trackers should be one`() =
         runTest(standardTestDispatcher) {
-            coEvery { mockApiService.getInteractions() } returns listOf(InteractionFakeUtils.createFakeInteractionConfig())
+            coEvery { mockConfigFetcher.getConfigs() } returns listOf(InteractionFakeUtils.createFakeInteractionConfig())
             mockInteractionManager.init()
             advanceUntilIdle()
             Assertions.assertThat(mockInteractionManager.interactionTrackers).hasSize(1)
@@ -83,7 +77,7 @@ class InteractionManagerTest {
     @Test
     fun `When interaction is two interaction trackers should be two`() =
         runTest(standardTestDispatcher) {
-            coEvery { mockApiService.getInteractions() } returns listOf(
+            coEvery { mockConfigFetcher.getConfigs() } returns listOf(
                 InteractionFakeUtils.createFakeInteractionConfig(),
                 InteractionFakeUtils.createFakeInteractionConfig(),
             )
@@ -1467,7 +1461,7 @@ class InteractionManagerTest {
     }
 
     private fun TestScope.initMockInteractionManager(vararg interactionConfigs: InteractionConfig) {
-        coEvery { mockApiService.getInteractions() } returns interactionConfigs.toList()
+        coEvery { mockConfigFetcher.getConfigs() } returns interactionConfigs.toList()
         mockInteractionManager.init()
         advanceUntilIdle()
     }

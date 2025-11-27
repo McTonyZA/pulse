@@ -16,7 +16,9 @@ import io.opentelemetry.android.agent.dsl.DiskBufferingConfigurationSpec
 import io.opentelemetry.android.agent.dsl.instrumentation.InstrumentationConfiguration
 import io.opentelemetry.android.agent.session.SessionConfig
 import io.opentelemetry.android.config.OtelRumConfig
+import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader
 import io.opentelemetry.android.instrumentation.interaction.library.InteractionAttributesSpanAppender
+import io.opentelemetry.android.instrumentation.interaction.library.InteractionInstrumentation
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.logs.Logger
 import io.opentelemetry.api.trace.Tracer
@@ -54,9 +56,13 @@ internal class PulseSDKImpl : PulseSDK {
                     pulseSpanProcessor.PulseSpanTypeAttributesAppender()
                 )
                 // interaction specific attributed present in other spans
-                if (config.isInteractionsEnabled) {
+                if (!config.isSuppressed(InteractionInstrumentation.INSTRUMENTATION_NAME)) {
                     tracerProviderBuilder.addSpanProcessor(
-                        InteractionAttributesSpanAppender.createSpanProcessor()
+                        InteractionAttributesSpanAppender.createSpanProcessor(
+                            AndroidInstrumentationLoader.getInstrumentation(
+                                InteractionInstrumentation::class.java
+                            ).interactionManagerInstance
+                        )
                     )
                 }
                 tracerProviderBuilder
@@ -67,9 +73,13 @@ internal class PulseSDKImpl : PulseSDK {
                 loggerProviderBuilder.addLogRecordProcessor(
                     pulseSpanProcessor.PulseLogTypeAttributesAppender()
                 )
-                if (config.isInteractionsEnabled) {
+                if (!config.isSuppressed(InteractionInstrumentation.INSTRUMENTATION_NAME)) {
                     loggerProviderBuilder.addLogRecordProcessor(
-                        InteractionAttributesSpanAppender.createLogProcessor()
+                        InteractionAttributesSpanAppender.createLogProcessor(
+                            AndroidInstrumentationLoader.getInstrumentation(
+                                InteractionInstrumentation::class.java
+                            ).interactionManagerInstance
+                        )
                     )
                 }
                 loggerProviderBuilder

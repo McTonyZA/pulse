@@ -34,7 +34,12 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
-    PulseSDK.INSTANCE.initialize(this, "http://10.0.2.2:4318")
+    PulseSDK.INSTANCE.initialize(this, "http://10.0.2.2:4318") {
+      interaction {
+        enabled(true)
+        setConfigUrl { "http://10.0.2.2:8080/v1/interactions/all-active-interactions/" }
+      }
+    }
     loadReactNative(this)
   }
 }

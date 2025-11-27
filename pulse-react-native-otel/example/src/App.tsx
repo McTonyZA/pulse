@@ -10,6 +10,7 @@ import ErrorHandlerExample from './examples/ErrorHandlerExample';
 import NetworkInterceptorExample from './examples/NetworkInterceptorExample';
 import ErrorBoundaryExample from './examples/ErrorBoundaryExample';
 import AndroidFeaturesExample from './examples/AndroidFeaturesExample';
+import InteractionDemo from './examples/InteractionDemo';
 
 Pulse.start();
 
@@ -74,9 +75,16 @@ const DEMO_CONFIGS: DemoConfig[] = [
   {
     id: 'androidFeatures',
     label: '🤖 Android Features',
-    title: 'Android Features (ANR Test)',
+    title: 'Android Features Testing',
     color: '#795548',
     component: AndroidFeaturesExample,
+  },
+  {
+    id: 'interaction',
+    label: '🎯 Interaction Demo',
+    title: 'Interaction Event Tracking',
+    color: '#9C27B0',
+    component: InteractionDemo,
   },
 ];
 

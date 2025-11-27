@@ -1,0 +1,8 @@
+.CustomEventThresholdsGrid {
+  margin-top: var(--mantine-spacing-lg);
+}
+
+.ErrorTextThresholds {
+  color: var(--mantine-color-red-6);
+  font-size: var(--mantine-font-size-sm);
+}

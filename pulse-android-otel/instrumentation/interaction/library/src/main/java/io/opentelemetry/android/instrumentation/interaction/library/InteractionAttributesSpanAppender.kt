@@ -52,16 +52,8 @@ class InteractionAttributesSpanAppender(
             InteractionAttributesSpanAppender(interactionManager)
 
         @JvmStatic
-        fun createSpanProcessor(): SpanProcessor =
-            InteractionAttributesSpanAppender(InteractionManager.instance)
-
-        @JvmStatic
         fun createLogProcessor(interactionManager: InteractionManager): LogRecordProcessor =
             InteractionLogListener(interactionManager)
-
-        @JvmStatic
-        fun createLogProcessor(): LogRecordProcessor =
-            createLogProcessor(InteractionManager.instance)
 
         internal fun createInteractionAttributes(value: List<InteractionRunningStatus>): Attributes? {
             val ids = value.runningIds

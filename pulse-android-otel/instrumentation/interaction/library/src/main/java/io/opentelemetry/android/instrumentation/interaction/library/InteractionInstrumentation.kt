@@ -5,6 +5,8 @@ import com.pulse.android.core.Interaction
 import com.pulse.android.core.InteractionLocalEvent
 import com.pulse.android.core.InteractionManager
 import com.pulse.android.core.InteractionRunningStatus
+import com.pulse.android.core.config.InteractionConfigFetcher
+import com.pulse.android.core.config.InteractionConfigRestFetcher
 import com.pulse.android.core.events
 import com.pulse.android.core.isErrored
 import com.pulse.android.core.markerEvents
@@ -32,12 +34,30 @@ class InteractionInstrumentation :
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     private val additionalAttributeExtractors: MutableList<InteractionAttributesExtractor> =
         mutableListOf()
+    private var interactionConfigFetcher: InteractionConfigFetcher? = null
+
+    /**
+     * Configure the interaction config fetcher.
+     * In case not set defaults to "http://10.0.2.2:8080/interaction-configs" with [InteractionConfigRestFetcher]
+     */
+    fun setConfigFetcher(configFetcher: InteractionConfigFetcher): InteractionInstrumentation =
+        apply {
+            this.interactionConfigFetcher = configFetcher
+        }
+
+    val interactionManagerInstance by lazy {
+        InteractionManager(
+            interactionConfigFetcher ?: InteractionConfigRestFetcher {
+                "http://10.0.2.2:8080/interaction-configs"
+            }
+        )
+    }
 
     override fun install(ctx: InstallationContext) {
         additionalAttributeExtractors.add(DefaultInteractionAttributesExtractor())
         launch {
-            InteractionManager.instance.init()
-            InteractionManager.instance.interactionTrackerStatesState.collect { interactionRunningStatuses ->
+            interactionManagerInstance.init()
+            interactionManagerInstance.interactionTrackerStatesState.collect { interactionRunningStatuses ->
                 handleSuccessInteraction(
                     ctx.openTelemetry.tracerProvider,
                     additionalAttributeExtractors,
@@ -55,7 +75,7 @@ class InteractionInstrumentation :
         return this
     }
 
-    override val name: String = "android-interaction"
+    override val name: String = INSTRUMENTATION_NAME
 
     companion object {
         fun handleSuccessInteraction(
@@ -74,7 +94,9 @@ class InteractionInstrumentation :
 
                     is InteractionRunningStatus.OngoingMatch -> {
                         interactionRunningStatus.interaction?.let { interaction ->
-                            val timeSpanInNano = interaction.timeSpanInNanos
+                            // TODO: Investigate why timeSpanInNanos can be null (empty events list)
+                            // This safety check prevents crash but we need to understand root cause
+                            val timeSpanInNano = interaction.timeSpanInNanos ?: return@let
                             val span = tracer.spanBuilder(interaction.name).apply {
                                 setNoParent()
                                 val attributesBuilder = Attributes.builder()
@@ -110,5 +132,6 @@ class InteractionInstrumentation :
         }
 
         internal const val LOG_TAG = "InteractionInstr"
+        const val INSTRUMENTATION_NAME = "android-interaction"
     }
 }

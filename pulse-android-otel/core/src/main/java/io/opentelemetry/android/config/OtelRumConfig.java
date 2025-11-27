@@ -87,16 +87,6 @@ public class OtelRumConfig {
     }
 
     /**
-     * Disables the interactions. Default = true.
-     *
-     * @return this
-     */
-    public OtelRumConfig disableInteractions() {
-        enableInteractions = false;
-        return this;
-    }
-
-    /**
      * Returns true if interactions are enabled, false otherwise.
      */
     public boolean isInteractionsEnabled() {

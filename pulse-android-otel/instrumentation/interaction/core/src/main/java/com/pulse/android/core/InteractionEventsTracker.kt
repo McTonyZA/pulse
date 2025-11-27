@@ -31,7 +31,7 @@ internal class InteractionEventsTracker(
 
     fun checkAndAdd(event: InteractionLocalEvent, timerScope: CoroutineScope) {
         val newValue = if (
-            event matchesAny interactionConfig.eventSequence ||
+            event matchesAny interactionConfig.events ||
             event matchesAny interactionConfig.globalBlacklistedEvents
         ) {
             logDebug { "match for event = ${event.name}, timeInNano = ${event.timeInNano}" }
