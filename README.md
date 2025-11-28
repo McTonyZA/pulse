@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ Pulse
+# Pulse
 
 **A digital experience platform that helps you understand how users are interacting with your platform in real time**
 
