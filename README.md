@@ -20,7 +20,7 @@
 
 ## 🌟 About
 
-Pulse is a modern observability platform that provides comprehensive monitoring capabilities for web, mobile, and backend applications. Built on **OpenTelemetry standards**, it offers real-time insights into application performance, user behavior, and system health through distributed tracing, metrics, and analytics.
+A digital experience platform that helps you understand how users are interacting with your platform in real time; combining behavioral, technical and business insights to drive better user experiences.
 
 ### Key Features
 
