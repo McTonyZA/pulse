@@ -16,9 +16,10 @@ public object PulseInteractionAttributes {
     public val INTERACTION_NAME: AttributeKey<String> =
         AttributeKey.stringKey(InteractionConstant.NAME)
     public val INTERACTION_ID: AttributeKey<String> = AttributeKey.stringKey(InteractionConstant.ID)
-    public val INTERACTION_CONFIG_ID: AttributeKey<String> = AttributeKey.stringKey(
-        InteractionConstant.CONFIG_ID
-    )
+    public val INTERACTION_CONFIG_ID: AttributeKey<String> =
+        AttributeKey.stringKey(
+            InteractionConstant.CONFIG_ID,
+        )
     public val INTERACTION_LAST_EVENT_TIME: AttributeKey<Long> =
         AttributeKey.longKey(InteractionConstant.LAST_EVENT_TIME_IN_NANO)
 }

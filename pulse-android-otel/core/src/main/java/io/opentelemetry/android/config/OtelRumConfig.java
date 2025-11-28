@@ -22,8 +22,7 @@ import java.util.function.Supplier;
  */
 public class OtelRumConfig {
 
-    @Nullable
-    private Supplier<Attributes> globalAttributesSupplier = null;
+    @Nullable private Supplier<Attributes> globalAttributesSupplier = null;
     private boolean includeNetworkAttributes = true;
     private boolean enableInteractions = true;
     private boolean includeFrameAttributes = true;
@@ -69,9 +68,7 @@ public class OtelRumConfig {
         return this;
     }
 
-    /**
-     * Disable adding frame attributes in spans about slow and frozen frames
-     */
+    /** Disable adding frame attributes in spans about slow and frozen frames */
     public OtelRumConfig disableFrameAttributes() {
         includeFrameAttributes = false;
         return this;
@@ -86,9 +83,7 @@ public class OtelRumConfig {
         return includeNetworkAttributes;
     }
 
-    /**
-     * Returns true if interactions are enabled, false otherwise.
-     */
+    /** Returns true if interactions are enabled, false otherwise. */
     public boolean isInteractionsEnabled() {
         return enableInteractions;
     }
@@ -104,9 +99,7 @@ public class OtelRumConfig {
         return this;
     }
 
-    /**
-     * Returns true if the SDK is configured to generate initialization events, false otherwise.
-     */
+    /** Returns true if the SDK is configured to generate initialization events, false otherwise. */
     public boolean shouldGenerateSdkInitializationEvents() {
         return generateSdkInitializationEvents;
     }
@@ -122,9 +115,7 @@ public class OtelRumConfig {
         return this;
     }
 
-    /**
-     * Return true if the SDK should be configured to report screen attributes.
-     */
+    /** Return true if the SDK should be configured to report screen attributes. */
     public boolean shouldIncludeScreenAttributes() {
         return includeScreenAttributes;
     }
@@ -179,9 +170,7 @@ public class OtelRumConfig {
         return this;
     }
 
-    /**
-     * Returns false when the given instrumentation has been suppressed. True otherwise.
-     */
+    /** Returns false when the given instrumentation has been suppressed. True otherwise. */
     public boolean isSuppressed(String instrumentationName) {
         return suppressedInstrumentations.contains(instrumentationName);
     }

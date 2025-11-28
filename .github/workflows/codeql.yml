@@ -22,9 +22,11 @@ jobs:
       actions: read  # for github/codeql-action/init to get workflow details
       security-events: write  # for github/codeql-action/analyze to upload SARIF results
     runs-on: ubuntu-latest
+    env:
+      ANDROID_PROJECT_DIR: ./pulse-android-otel
     defaults:
       run:
-        working-directory: ./pulse-android-otel
+        working-directory: ${{ env.ANDROID_PROJECT_DIR }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
@@ -68,4 +70,5 @@ jobs:
         uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
         with:
           api-level: 29
+          working-directory: ${{ env.ANDROID_PROJECT_DIR }}
           script: ./gradlew connectedCheck

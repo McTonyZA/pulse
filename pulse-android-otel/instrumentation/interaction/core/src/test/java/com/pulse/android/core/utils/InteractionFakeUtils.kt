@@ -15,9 +15,9 @@ object InteractionFakeUtils {
         uptimeLowerLimitInNano: Long = 100L,
         uptimeMidLimitInNano: Long = 500L,
         uptimeUpperLimitInNano: Long = 1000L,
-        thresholdInNanos: Long = TimeUnit.SECONDS.toNanos(20)
-    ): InteractionConfig {
-        return InteractionConfig(
+        thresholdInNanos: Long = TimeUnit.SECONDS.toNanos(20),
+    ): InteractionConfig =
+        InteractionConfig(
             id = id,
             name = name,
             events = eventSequence,
@@ -25,31 +25,28 @@ object InteractionFakeUtils {
             uptimeLowerLimitInMs = uptimeLowerLimitInNano / 1000_000,
             uptimeMidLimitInMs = uptimeMidLimitInNano / 1000_000,
             uptimeUpperLimitInMs = uptimeUpperLimitInNano / 1000_000,
-            thresholdInMs = thresholdInNanos / 1000_000
+            thresholdInMs = thresholdInNanos / 1000_000,
         )
-    }
 
     fun createFakeInteractionEvent(
         name: String = "fake-event",
         props: List<InteractionAttrsEntry>? = null,
-        isBlacklisted: Boolean = false
-    ): InteractionEvent {
-        return InteractionEvent(
+        isBlacklisted: Boolean = false,
+    ): InteractionEvent =
+        InteractionEvent(
             name = name,
             props = props,
-            isBlacklisted = isBlacklisted
+            isBlacklisted = isBlacklisted,
         )
-    }
 
     fun createFakeInteractionAttrsEntry(
         name: String = "fake-attr-name",
         value: String = "fake-attr-value",
-        operator: String = "EQUALS"
-    ): InteractionAttrsEntry {
-        return InteractionAttrsEntry(
+        operator: String = "EQUALS",
+    ): InteractionAttrsEntry =
+        InteractionAttrsEntry(
             name = name,
             value = value,
-            operator = operator
+            operator = operator,
         )
-    }
 }

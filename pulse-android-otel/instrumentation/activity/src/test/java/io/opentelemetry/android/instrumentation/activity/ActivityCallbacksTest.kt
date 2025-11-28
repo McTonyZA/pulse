@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
 internal class ActivityCallbacksTest {

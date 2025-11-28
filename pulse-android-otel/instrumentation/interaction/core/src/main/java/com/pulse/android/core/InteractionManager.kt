@@ -19,7 +19,6 @@ public class InteractionManager(
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
-
     private var interactionConfigs: List<InteractionConfig>? = null
     internal var interactionTrackers: List<InteractionEventsTracker>? = null
     private val eventQueue: InteractionEventQueue = InteractionEventQueue(defaultDispatcher)
@@ -33,22 +32,24 @@ public class InteractionManager(
         return launch(ioDispatcher) {
             logDebug { "[InteractionManager] Initializing with endpoint: $interactionFetcher" }
 
-            val interactionConfigs = interactionConfigs ?: runCatching {
-                interactionFetcher.getConfigs()
-            }.onFailure { error ->
-                logDebug { "[InteractionManager] Failed to fetch interactions: ${error.message}" }
-                return@launch
-            }.getOrNull() ?: run {
-                logDebug { "[InteractionManager] No interaction configs received" }
-                return@launch
-            }
+            val interactionConfigs =
+                interactionConfigs ?: runCatching {
+                    interactionFetcher.getConfigs()
+                }.onFailure { error ->
+                    logDebug { "[InteractionManager] Failed to fetch interactions: ${error.message}" }
+                    return@launch
+                }.getOrNull() ?: run {
+                    logDebug { "[InteractionManager] No interaction configs received" }
+                    return@launch
+                }
 
             logDebug { "[InteractionManager] Loaded ${interactionConfigs.size} interaction(s)" }
 
-            interactionTrackers = interactionConfigs
-                .map { interactionConfig ->
-                    InteractionEventsTracker(interactionConfig)
-                }
+            interactionTrackers =
+                interactionConfigs
+                    .map { interactionConfig ->
+                        InteractionEventsTracker(interactionConfig)
+                    }
             interactionTrackers
                 .orEmpty()
                 .map { interactionEventsTracker ->
@@ -71,7 +72,7 @@ public class InteractionManager(
                         .orEmpty()
                         .map {
                             it.interactionRunningStatusState
-                        }
+                        },
                 ) {
                     it.toList()
                 }.collect {
@@ -90,13 +91,14 @@ public class InteractionManager(
     public fun addEvent(
         eventName: String,
         params: Map<String, Any?> = emptyMap(),
-        eventTimeInNano: Long = System.currentTimeMillis() * 1_000_000
+        eventTimeInNano: Long = System.currentTimeMillis() * 1_000_000,
     ) {
-        val event = InteractionLocalEvent(
-            name = eventName,
-            timeInNano = eventTimeInNano,
-            props = params.mapValues { it.value.toString() }
-        )
+        val event =
+            InteractionLocalEvent(
+                name = eventName,
+                timeInNano = eventTimeInNano,
+                props = params.mapValues { it.value.toString() },
+            )
         eventQueue.addEvent(event)
     }
 
@@ -108,13 +110,14 @@ public class InteractionManager(
     public fun addMarkerEvent(
         eventName: String,
         params: Map<String, Any?> = emptyMap(),
-        eventTimeInNano: Long = System.currentTimeMillis() * 1_000_000
+        eventTimeInNano: Long = System.currentTimeMillis() * 1_000_000,
     ) {
-        val event = InteractionLocalEvent(
-            name = eventName,
-            timeInNano = eventTimeInNano,
-            props = params.mapValues { it.value.toString() }
-        )
+        val event =
+            InteractionLocalEvent(
+                name = eventName,
+                timeInNano = eventTimeInNano,
+                props = params.mapValues { it.value.toString() },
+            )
         eventQueue.addMarkerEvent(event)
     }
 

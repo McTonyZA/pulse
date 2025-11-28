@@ -12,6 +12,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class ApiResponse<T>(
     val data: T,
-    val error: String? = null
+    val error: String? = null,
 )
-

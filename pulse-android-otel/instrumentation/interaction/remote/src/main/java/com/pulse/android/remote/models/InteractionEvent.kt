@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 public data class InteractionEvent(
     val name: String,
     val props: List<InteractionAttrsEntry>?,
-    val isBlacklisted: Boolean
+    val isBlacklisted: Boolean,
 )

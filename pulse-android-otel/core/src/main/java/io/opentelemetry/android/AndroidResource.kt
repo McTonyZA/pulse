@@ -37,7 +37,7 @@ object AndroidResource {
         appVersion?.let {
             resourceBuilder.put(
                 RumConstants.App.BUILD_ID,
-                appVersionCode.toString()
+                appVersionCode.toString(),
             )
         }
 
@@ -92,40 +92,25 @@ object AndroidResource {
         }
     }
 
-    @androidx.annotation.RequiresApi(Build.VERSION_CODES.P)
-    private fun getLongVersionCodeApi28(packageInfo: android.content.pm.PackageInfo): Long {
-        return packageInfo.longVersionCode
-    }
+    @RequiresApi(Build.VERSION_CODES.P)
+    private fun getLongVersionCodeApi28(packageInfo: android.content.pm.PackageInfo): Long = packageInfo.longVersionCode
 
     private val modelIdentifier: String
-        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val modelIdApi31 = modelIdentifierApi31
-            if (modelIdApi31 == UNKNOWN_MODEL_ID) {
-                Build.MODEL
+        get() =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val modelIdApi31 = modelIdentifierApi31
+                if (modelIdApi31 == UNKNOWN_MODEL_ID) {
+                    Build.MODEL
+                } else {
+                    modelIdApi31
+                }
             } else {
-                modelIdApi31
+                Build.MODEL
             }
-        } else {
-            Build.MODEL
-        }
 
     @get:RequiresApi(Build.VERSION_CODES.S)
     private val modelIdentifierApi31: String
         get() = "${Build.ODM_SKU}_${Build.SKU}"
-
-    private val oSDescription: String
-        get() {
-            val osDescriptionBuilder = StringBuilder()
-            return osDescriptionBuilder
-                .append("Android Version ")
-                .append(Build.VERSION.RELEASE)
-                .append(" (Build ")
-                .append(Build.ID)
-                .append(" API level ")
-                .append(Build.VERSION.SDK_INT)
-                .append(")")
-                .toString()
-        }
 
     private const val UNKNOWN_MODEL_ID = "unknown_unknown"
 }
