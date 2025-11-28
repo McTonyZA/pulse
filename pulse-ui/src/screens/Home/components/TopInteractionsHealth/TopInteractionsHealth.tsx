@@ -6,7 +6,7 @@ import { IconArrowRight } from "@tabler/icons-react";
 import { useGetDataQuery } from "../../../../hooks";
 import { useMemo } from "react";
 import dayjs from "dayjs";
-import { SpanType } from "../../../../constants/PulseOtelSemcov";
+import { COLUMN_NAME, SpanType } from "../../../../constants/PulseOtelSemcov";
 
 export function TopInteractionsHealth({
   onViewAll,
@@ -34,7 +34,7 @@ export function TopInteractionsHealth({
       select: [
         {
           function: "COL",
-          param: { field: "SpanName" },
+          param: { field: COLUMN_NAME.SPAN_NAME },
           alias: "interaction_name",
         },
         {
@@ -51,7 +51,7 @@ export function TopInteractionsHealth({
         { function: "USER_CATEGORY_POOR", alias: "user_poor" },
         { function: "DURATION_P50", alias: "p50" },
       ],
-      filters: [{ field: "SpanType", operator: "EQ", value: [SpanType.INTERACTION] }],
+      filters: [{ field: COLUMN_NAME.SPAN_TYPE, operator: "EQ", value: [SpanType.INTERACTION] }],
       groupBy: ["interaction_name"],
       orderBy: [{ field: "spanfreq", direction: "DESC" }],
       limit: 4,

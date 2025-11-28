@@ -10,7 +10,7 @@ import { useGetDataQuery } from "../../../../hooks";
 import { useMemo } from "react";
 import { ActiveSessionsGraphProps } from "./ActiveSessionsGraph.interface";
 import { getTimeBucketSize } from "../../../../utils/TimeBucketUtil";
-import { SpanType } from "../../../../constants/PulseOtelSemcov";
+import { COLUMN_NAME, SpanType } from "../../../../constants/PulseOtelSemcov";
 
 dayjs.extend(utc);
 
@@ -63,7 +63,7 @@ export function ActiveSessionsGraph({
       value: string[];
     }> = [
       {
-        field: "SpanType",
+        field: COLUMN_NAME.SPAN_TYPE,
         operator: "EQ",
         value: [spanType],
       },
@@ -87,7 +87,7 @@ export function ActiveSessionsGraph({
 
     if (osVersion && osVersion !== "all") {
       filterArray.push({
-        field: "ResourceAttributes['os.version']",
+        field: COLUMN_NAME.OS_VERSION,
         operator: "EQ",
         value: [osVersion],
       });
@@ -95,7 +95,7 @@ export function ActiveSessionsGraph({
 
     if (device && device !== "all") {
       filterArray.push({
-        field: "ResourceAttributes['device.model']",
+        field: COLUMN_NAME.DEVICE_MODEL,
         operator: "EQ",
         value: [device],
       });
@@ -115,7 +115,7 @@ export function ActiveSessionsGraph({
       select: [
         {
           function: "TIME_BUCKET",
-          param: { bucket: bucketSize, field: "Timestamp" },
+          param: { bucket: bucketSize, field: COLUMN_NAME.TIMESTAMP },
           alias: "t1",
         },
         {

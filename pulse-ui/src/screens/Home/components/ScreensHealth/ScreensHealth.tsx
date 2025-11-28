@@ -12,7 +12,7 @@ import { Button } from "@mantine/core";
 import { useGetDataQuery } from "../../../../hooks";
 import { useMemo } from "react";
 import dayjs from "dayjs";
-import { STATUS_CODE, SpanType } from "../../../../constants/PulseOtelSemcov";
+import { COLUMN_NAME, STATUS_CODE, SpanType } from "../../../../constants/PulseOtelSemcov";
 
 export function ScreensHealth({
   startTime,
@@ -41,17 +41,17 @@ export function ScreensHealth({
         },
         {
           function: "CUSTOM",
-          param: { expression: "sumIf(Duration,SpanType = 'screen_session')" },
+          param: { expression: `sumIf(Duration,SpanType = '${SpanType.SCREEN_SESSION}')` },
           alias: "total_time_spent",
         },
         {
           function: "CUSTOM",
-          param: { expression: "sumIf(Duration,SpanType = 'screen_load')" },
+          param: { expression: `sumIf(Duration,SpanType = '${SpanType.SCREEN_LOAD}')` },
           alias: "total_load_time",
         },
         {
           function: "CUSTOM",
-          param: { expression: "uniqCombined(UserId)" },
+          param: { expression: `uniqCombined(${COLUMN_NAME.USER_ID})` },
           alias: "user_count",
         },
         {

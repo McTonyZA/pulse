@@ -9,7 +9,7 @@ import utc from "dayjs/plugin/utc";
 import { useGetDataQuery } from "../../../../hooks";
 import { useMemo } from "react";
 import { UserEngagementGraphProps } from "./UserEngagementGraph.interface";
-import { SpanType } from "../../../../constants/PulseOtelSemcov";
+import { COLUMN_NAME, SpanType } from "../../../../constants/PulseOtelSemcov";
 
 dayjs.extend(utc);
 
@@ -112,7 +112,7 @@ export function UserEngagementGraph({
       select: [
         {
           function: "TIME_BUCKET",
-          param: { bucket: "1d", field: "Timestamp" },
+          param: { bucket: "1d", field: COLUMN_NAME.TIMESTAMP },
           alias: "t1",
         },
         {
@@ -139,12 +139,12 @@ export function UserEngagementGraph({
       select: [
         {
           function: "TIME_BUCKET",
-          param: { bucket: "1w", field: "Timestamp" },
+          param: { bucket: "1w", field: COLUMN_NAME.TIMESTAMP },
           alias: "t1",
         },
         {
           function: "CUSTOM",
-          param: { expression: "uniqCombined(UserId)" },
+          param: { expression: `uniqCombined(${COLUMN_NAME.USER_ID})` },
           alias: "user_count",
         },
       ],
@@ -166,12 +166,12 @@ export function UserEngagementGraph({
       select: [
         {
           function: "TIME_BUCKET",
-          param: { bucket: "1M", field: "Timestamp" },
+          param: { bucket: "1M", field: COLUMN_NAME.TIMESTAMP },
           alias: "t1",
         },
         {
           function: "CUSTOM",
-          param: { expression: "uniqCombined(UserId)" },
+          param: { expression: `uniqCombined(${COLUMN_NAME.USER_ID})` },
           alias: "user_count",
         },
       ],
