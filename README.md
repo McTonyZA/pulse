@@ -36,8 +36,8 @@ A digital experience platform that helps you understand how users are interactin
 ## 🚀 Quick Start
 
 - **[Setup Guide](https://pulse.horizonos.in/docs/setup)** - Get Pulse up and running locally
-- **[Android SDK](http://pulse.horizonos.in/docs/sdk/android/overview)** - Integrate Pulse into your Android app
-- **[React Native SDK](http://pulse.horizonos.in/docs/sdk/react-native/overview)** - Integrate Pulse into your React Native app
+- **[Android SDK](https://pulse.horizonos.in/docs/sdk/android/overview)** - Integrate Pulse into your Android app
+- **[React Native SDK](https://pulse.horizonos.in/docs/sdk/react-native/overview)** - Integrate Pulse into your React Native app
 
 ---
 
@@ -50,8 +50,8 @@ Complete documentation is available at **[https://pulse.horizonos.in/docs](https
 - [Setup Guide](https://pulse.horizonos.in/docs/setup) - Platform setup instructions
 
 ### Mobile SDKs
-- [Android SDK](http://pulse.horizonos.in/docs/sdk/android/overview) - Installation, Instrumentation, API Reference
-- [React Native SDK](http://pulse.horizonos.in/docs/sdk/react-native/overview) - Quick Start, Instrumentation, API Reference
+- [Android SDK](https://pulse.horizonos.in/docs/sdk/android/overview) - Installation, Instrumentation, API Reference
+- [React Native SDK](https://pulse.horizonos.in/docs/sdk/react-native/overview) - Quick Start, Instrumentation, API Reference
 
 ### API & Reference
 - [API Documentation](https://pulse.horizonos.in/docs/api-documentation/authentication) - Complete API reference
