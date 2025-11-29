@@ -86,8 +86,11 @@ jobs:
               tree = ET.parse('target/site/jacoco/jacoco.xml')
               root = tree.getroot()
               
-              # Find the report-level LINE counter (first one in the document)
-              for counter in root.findall('.//counter[@type="LINE"]'):
+              # Get ONLY the direct child counter of the report element (aggregate)
+              # This is the true overall coverage, not package/class/method level
+              counter = root.find("./counter[@type='LINE']")
+              
+              if counter is not None:
                   missed = int(counter.get('missed', 0))
                   covered = int(counter.get('covered', 0))
                   total = missed + covered
@@ -107,7 +110,14 @@ jobs:
                               f.write(f'⚠️ Overall coverage ({percentage:.2f}%) is below minimum threshold of 35%\n\n')
                           else:
                               f.write('✅ Coverage meets minimum threshold of 35%\n\n')
-                      break
+                  else:
+                      with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                          f.write('### 📊 Code Coverage Report\n\n')
+                          f.write('⚠️ No coverage data available\n\n')
+              else:
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                      f.write('### 📊 Code Coverage Report\n\n')
+                      f.write('⚠️ LINE counter not found in report\n\n')
           except Exception as e:
               with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
                   f.write('### 📊 Code Coverage Report\n\n')
