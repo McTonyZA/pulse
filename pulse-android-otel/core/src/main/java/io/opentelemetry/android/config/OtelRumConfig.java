@@ -24,7 +24,6 @@ public class OtelRumConfig {
 
     @Nullable private Supplier<Attributes> globalAttributesSupplier = null;
     private boolean includeNetworkAttributes = true;
-    private boolean enableInteractions = true;
     private boolean includeFrameAttributes = true;
     private boolean generateSdkInitializationEvents = true;
     private boolean includeScreenAttributes = true;
@@ -81,11 +80,6 @@ public class OtelRumConfig {
     /** Returns true if runtime network attributes are enabled, false otherwise. */
     public boolean shouldIncludeNetworkAttributes() {
         return includeNetworkAttributes;
-    }
-
-    /** Returns true if interactions are enabled, false otherwise. */
-    public boolean isInteractionsEnabled() {
-        return enableInteractions;
     }
 
     /**

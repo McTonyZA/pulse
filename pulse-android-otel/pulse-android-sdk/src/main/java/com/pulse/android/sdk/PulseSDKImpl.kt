@@ -267,7 +267,7 @@ internal class PulseSDKImpl : PulseSDK {
     private var userId: String? = null
     private var userProps = ConcurrentHashMap<String, Any?>()
 
-    companion object {
+    internal companion object {
         private const val INSTRUMENTATION_SCOPE = "com.pulse.android.sdk"
     }
 }

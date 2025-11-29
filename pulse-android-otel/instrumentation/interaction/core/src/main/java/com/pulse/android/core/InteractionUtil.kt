@@ -272,10 +272,13 @@ internal inline fun logDebug(body: () -> String) {
     Log.d(InteractionConstant.LOG_TAG, body())
 }
 
-public data class Interaction(
-    val id: String,
-    val name: String,
-    var props: Map<String, Any?> = mapOf(),
+/**
+ * Contains the info about generated interaction
+ */
+public class Interaction internal constructor(
+    public val id: String,
+    public val name: String,
+    public val props: Map<String, Any?> = mapOf(),
 )
 
 @Suppress("UNCHECKED_CAST")

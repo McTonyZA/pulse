@@ -23,13 +23,13 @@ class ActivityTracer private constructor(
     private val initialAppActivity: AtomicReference<String> = builder.initialAppActivity
     private val tracer: Tracer = builder.tracer
     private val activityName: String = builder.activityName
-    val screenName: String? = builder.screenName
+    private val screenName: String = builder.screenName
     private val appStartupTimer: AppStartupTimer = builder.appStartupTimer
     private val activeSpan: ActiveSpan = builder.activeSpan
     private var sessionSpan: Span? = null
     private var sessionScope: Scope? = null
 
-    fun startSpanIfNoneInProgress(spanName: String): ActivityTracer =
+    internal fun startSpanIfNoneInProgress(spanName: String): ActivityTracer =
         apply {
             if (activeSpan.spanInProgress()) {
                 return this
@@ -37,7 +37,7 @@ class ActivityTracer private constructor(
             activeSpan.startSpanIfNotStarted { createSpanWithParent(spanName, null) }
         }
 
-    fun startActivityCreation(): ActivityTracer =
+    internal fun startActivityCreation(): ActivityTracer =
         apply {
             activeSpan.startSpanIfNotStarted { this.makeCreationSpan() }
         }
@@ -57,7 +57,7 @@ class ActivityTracer private constructor(
         return createSpanWithParent("Created", null)
     }
 
-    fun startActivitySessionSpan(): ActivityTracer =
+    internal fun startActivitySessionSpan(): ActivityTracer =
         apply {
             val spanBuilder =
                 tracer.spanBuilder("ActivitySession").apply {
@@ -73,13 +73,13 @@ class ActivityTracer private constructor(
             sessionSpan = span
         }
 
-    fun stopActivitySessionSpan(): ActivityTracer =
+    internal fun stopActivitySessionSpan(): ActivityTracer =
         apply {
             sessionSpan?.end()
             sessionScope?.close()
         }
 
-    fun initiateRestartSpanIfNecessary(multiActivityApp: Boolean): ActivityTracer {
+    internal fun initiateRestartSpanIfNecessary(multiActivityApp: Boolean): ActivityTracer {
         if (activeSpan.spanInProgress()) {
             return this
         }
@@ -206,16 +206,16 @@ class ActivityTracer private constructor(
             return ActivityTracer(this)
         }
 
-        companion object {
+        private companion object {
             private val INVALID_ACTIVE_SPAN = ActiveSpan { null }
-            private val INVALID_TRACER = Tracer { spanName: String? -> null }
+            private val INVALID_TRACER = Tracer { _: String? -> null }
             private val INVALID_TIMER = AppStartupTimer()
         }
     }
 
-    companion object {
-        @JvmStatic
-        val ACTIVITY_NAME_KEY: AttributeKey<String?> = AttributeKey.stringKey("activity.name")
+    internal companion object {
+        @JvmField
+        internal val ACTIVITY_NAME_KEY: AttributeKey<String?> = AttributeKey.stringKey("activity.name")
 
         internal fun builder(activity: Activity): Builder = Builder(activity)
     }

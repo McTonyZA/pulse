@@ -167,16 +167,23 @@ private class SortedList<T>(
 }
 
 public sealed class InteractionRunningStatus {
-    public data class NoOngoingMatch(
-        val oldOngoingInteractionRunningStatus: InteractionRunningStatus?,
+    public class NoOngoingMatch internal constructor(
+        public val oldOngoingInteractionRunningStatus: InteractionRunningStatus?,
     ) : InteractionRunningStatus()
 
-    public data class OngoingMatch(
-        val index: Int,
-        val interactionId: String,
-        val interactionConfig: InteractionConfig,
-        val interaction: Interaction?,
-    ) : InteractionRunningStatus()
+    public class OngoingMatch internal constructor(
+        public val index: Int,
+        public val interactionId: String,
+        public val interactionConfig: InteractionConfig,
+        public val interaction: Interaction?,
+    ) : InteractionRunningStatus() {
+        internal fun copy(
+            index: Int = this.index,
+            interactionId: String = this.interactionId,
+            interactionConfig: InteractionConfig = this.interactionConfig,
+            interaction: Interaction? = this.interaction,
+        ): OngoingMatch = OngoingMatch(index, interactionId, interactionConfig, interaction)
+    }
 }
 
 // todo can be inlined but AnimalSniffer task failing

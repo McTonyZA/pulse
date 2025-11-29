@@ -46,7 +46,7 @@ class InteractionLogListener(
         }
     }
 
-    companion object {
+    private companion object {
         private val listOfEventToAddInInteraction =
             listOf(
                 "device.crash",

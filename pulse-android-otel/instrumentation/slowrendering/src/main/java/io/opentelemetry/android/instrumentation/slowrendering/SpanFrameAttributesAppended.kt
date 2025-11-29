@@ -38,7 +38,7 @@ class SpanFrameAttributesAppended : ExtendedSpanProcessor {
 
     override fun isOnEndingRequired(): Boolean = true
 
-    companion object {
+    internal companion object {
         private fun getFrameAttributes(
             first: SlowRenderListener.Companion.CumulativeFrameData,
             second: SlowRenderListener.Companion.CumulativeFrameData,

@@ -6,19 +6,19 @@ import kotlinx.serialization.Serializable
 
 @Keep
 @Serializable
-public data class InteractionConfig(
-    val id: Int,
-    val name: String,
-    val events: List<InteractionEvent>,
-    val globalBlacklistedEvents: List<InteractionEvent> = emptyList(),
-    val uptimeLowerLimitInMs: Long,
-    val uptimeMidLimitInMs: Long,
-    val uptimeUpperLimitInMs: Long,
-    val thresholdInMs: Long,
+public class InteractionConfig internal constructor(
+    public val id: Int,
+    public val name: String,
+    public val events: List<InteractionEvent>,
+    public val globalBlacklistedEvents: List<InteractionEvent> = emptyList(),
+    public val uptimeLowerLimitInMs: Long,
+    public val uptimeMidLimitInMs: Long,
+    public val uptimeUpperLimitInMs: Long,
+    public val thresholdInMs: Long,
 ) {
-    val eventsSize: Int = events.size
+    public val eventsSize: Int = events.size
 
-    val firstEvent: InteractionEvent = events.first()
+    public val firstEvent: InteractionEvent = events.first()
 
     init {
         if (BuildConfig.DEBUG) {
