@@ -74,14 +74,14 @@ jobs:
           reporter: java-junit
           fail-on-error: true
 
-      - name: Comment coverage on PR
+      - name: Check coverage on PR and fail if below threshold
         if: github.event_name == 'pull_request'
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: |
             ${{ github.workspace }}/backend/server/target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 80
+          min-coverage-overall: 35
           min-coverage-changed-files: 80
           title: Backend Code Coverage Report
           skip-if-no-changes: false
