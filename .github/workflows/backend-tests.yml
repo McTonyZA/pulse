@@ -78,57 +78,41 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          echo "### 📊 Code Coverage Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          python3 << 'EOF'
+          import xml.etree.ElementTree as ET
+          import os
           
-          if [ ! -f target/site/jacoco/jacoco.xml ]; then
-            echo "⚠️ Coverage report not found" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
-          
-          # Sum up all LINE counters for total project coverage
-          total_missed=0
-          total_covered=0
-          
-          # Extract all LINE type counters and sum them
-          while read -r line; do
-            if [ -n "$line" ]; then
-              missed=$(echo "$line" | sed -n 's/.*missed="\([0-9]*\)".*/\1/p')
-              covered=$(echo "$line" | sed -n 's/.*covered="\([0-9]*\)".*/\1/p')
+          try:
+              tree = ET.parse('target/site/jacoco/jacoco.xml')
+              root = tree.getroot()
               
-              if [ -n "$missed" ] && [ -n "$covered" ]; then
-                total_missed=$((total_missed + missed))
-                total_covered=$((total_covered + covered))
-              fi
-            fi
-          done < <(grep 'type="LINE"' target/site/jacoco/jacoco.xml)
-          
-          if [ $total_missed -eq 0 ] && [ $total_covered -eq 0 ]; then
-            echo "⚠️ No coverage data available" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
-          
-          total=$((total_covered + total_missed))
-          percentage=$(awk "BEGIN {printf \"%.2f\", ($total_covered / $total) * 100}")
-          
-          echo "#### Overall Coverage" >> $GITHUB_STEP_SUMMARY
-          echo "**Coverage:** $percentage%" >> $GITHUB_STEP_SUMMARY
-          echo "- Lines Covered: $total_covered" >> $GITHUB_STEP_SUMMARY
-          echo "- Lines Missed: $total_missed" >> $GITHUB_STEP_SUMMARY
-          echo "- Total Lines: $total" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          # Check if coverage meets minimum threshold (35%)
-          threshold_check=$(awk "BEGIN {print ($percentage < 35) ? 1 : 0}")
-          if [ "$threshold_check" = "1" ]; then
-            echo "⚠️ Overall coverage ($percentage%) is below minimum threshold of 35%" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ Coverage meets minimum threshold of 35%" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          fi
+              # Find the report-level LINE counter (first one in the document)
+              for counter in root.findall('.//counter[@type="LINE"]'):
+                  missed = int(counter.get('missed', 0))
+                  covered = int(counter.get('covered', 0))
+                  total = missed + covered
+                  
+                  if total > 0:
+                      percentage = (covered / total) * 100
+                      
+                      with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                          f.write('### 📊 Code Coverage Report\n\n')
+                          f.write('#### Overall Coverage\n')
+                          f.write(f'**Coverage:** {percentage:.2f}%\n')
+                          f.write(f'- Lines Covered: {covered}\n')
+                          f.write(f'- Lines Missed: {missed}\n')
+                          f.write(f'- Total Lines: {total}\n\n')
+                          
+                          if percentage < 35:
+                              f.write(f'⚠️ Overall coverage ({percentage:.2f}%) is below minimum threshold of 35%\n\n')
+                          else:
+                              f.write('✅ Coverage meets minimum threshold of 35%\n\n')
+                      break
+          except Exception as e:
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                  f.write('### 📊 Code Coverage Report\n\n')
+                  f.write(f'⚠️ Unable to parse coverage data: {str(e)}\n\n')
+          EOF
 
       - name: Changed files coverage
         if: github.event_name == 'pull_request' && success()
