@@ -89,6 +89,24 @@ jobs:
           pass-emoji: ':green_circle:'
           fail-emoji: ':red_circle:'
 
+      - name: Upload Checkstyle report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkstyle-report
+          path: backend/server/target/checkstyle/checkstyle-report.xml
+          retention-days: 30
+
+      - name: Review Checkstyle violations on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: reviewdog/action-checkstyle@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          checkstyle_file: backend/server/target/checkstyle/checkstyle-report.xml
+          reporter: github-pr-review
+          level: warning
+          fail_on_error: false
+
   required-status-check:
     permissions:
       contents: read
