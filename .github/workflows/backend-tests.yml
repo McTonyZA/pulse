@@ -75,111 +75,126 @@ jobs:
           fail-on-error: true
 
       - name: Code coverage summary
-        if: always()
+        if: success()
         run: |
-          if [ -f target/site/jacoco/jacoco.xml ]; then
-            # Parse overall coverage from JaCoCo XML
-            missed=$(grep -oP 'type="LINE".*?missed="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1 || echo "0")
-            covered=$(grep -oP 'type="LINE".*?covered="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1 || echo "0")
-            
-            echo "### 📊 Code Coverage Report" >> $GITHUB_STEP_SUMMARY
+          set +e  # Don't exit on error
+          
+          echo "### 📊 Code Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ ! -f target/site/jacoco/jacoco.xml ]; then
+            echo "⚠️ Coverage report not found" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            
-            if [ -n "$missed" ] && [ -n "$covered" ] && [ "$missed" != "0" -o "$covered" != "0" ]; then
-              total=$((missed + covered))
-              if [ $total -gt 0 ]; then
-                percentage=$(awk "BEGIN {printf \"%.2f\", ($covered / $total) * 100}")
-                
-                echo "#### Overall Coverage" >> $GITHUB_STEP_SUMMARY
-                echo "**Coverage:** $percentage%" >> $GITHUB_STEP_SUMMARY
-                echo "- Lines Covered: $covered" >> $GITHUB_STEP_SUMMARY
-                echo "- Lines Missed: $missed" >> $GITHUB_STEP_SUMMARY
-                echo "- Total Lines: $total" >> $GITHUB_STEP_SUMMARY
-                echo "" >> $GITHUB_STEP_SUMMARY
-                
-                # Check if coverage meets minimum threshold (35%)
-                threshold_check=$(awk "BEGIN {print ($percentage < 35) ? 1 : 0}")
-                if [ "$threshold_check" = "1" ]; then
-                  echo "❌ **Build Failed: Overall coverage ($percentage%) is below minimum threshold of 35%**" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  exit 1
-                else
-                  echo "✅ Coverage meets minimum threshold of 35%" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                fi
-              fi
-            else
-              echo "⚠️ Unable to parse coverage data from jacoco.xml" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-            fi
+            exit 0
+          fi
+          
+          # Parse overall coverage from JaCoCo XML
+          missed=$(grep -oP 'type="LINE".*?missed="\K[0-9]+' target/site/jacoco/jacoco.xml 2>/dev/null | head -1)
+          covered=$(grep -oP 'type="LINE".*?covered="\K[0-9]+' target/site/jacoco/jacoco.xml 2>/dev/null | head -1)
+          
+          if [ -z "$missed" ] || [ -z "$covered" ]; then
+            echo "⚠️ Unable to parse coverage data" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          
+          total=$((missed + covered))
+          if [ $total -eq 0 ]; then
+            echo "⚠️ No coverage data available" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          
+          percentage=$(awk "BEGIN {printf \"%.2f\", ($covered / $total) * 100}")
+          
+          echo "#### Overall Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "**Coverage:** $percentage%" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines Covered: $covered" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines Missed: $missed" >> $GITHUB_STEP_SUMMARY
+          echo "- Total Lines: $total" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if coverage meets minimum threshold (35%)
+          threshold_check=$(awk "BEGIN {print ($percentage < 35) ? 1 : 0}")
+          if [ "$threshold_check" = "1" ]; then
+            echo "❌ **Build Failed: Overall coverage ($percentage%) is below minimum threshold of 35%**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            exit 1
           else
-            echo "⚠️ Coverage report not found at target/site/jacoco/jacoco.xml" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Coverage meets minimum threshold of 35%" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Changed files coverage
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request' && success()
         run: |
-          # Get list of changed Java files
-          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | grep '\.java$' | grep '^backend/server/src/main/' || echo "")
+          set +e  # Don't exit on error
           
-          if [ -n "$changed_files" ]; then
-            echo "#### Changed Files Coverage" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            # Initialize totals for aggregate coverage
-            total_covered=0
-            total_missed=0
-            
-            while IFS= read -r file; do
-              if [ -n "$file" ]; then
-                # Convert file path to package format for JaCoCo
-                class_path=$(echo "$file" | sed 's|backend/server/src/main/java/||' | sed 's|\.java$||' | sed 's|/|.|g')
-                class_name=$(echo "$class_path" | sed 's|.*\.||')
-                
-                # Try to find coverage in jacoco.xml
-                if [ -f target/site/jacoco/jacoco.xml ]; then
-                  # Extract coverage for this specific class
-                  coverage_line=$(grep -A 5 "name=\"$class_name\"" target/site/jacoco/jacoco.xml | grep 'type="LINE"' | head -1 || echo "")
-                  
-                  if [ -n "$coverage_line" ]; then
-                    file_missed=$(echo "$coverage_line" | grep -oP 'missed="\K[0-9]+' || echo "0")
-                    file_covered=$(echo "$coverage_line" | grep -oP 'covered="\K[0-9]+' || echo "0")
-                    
-                    # Add to aggregate totals
-                    total_covered=$((total_covered + file_covered))
-                    total_missed=$((total_missed + file_missed))
-                  fi
-                fi
-              fi
-            done <<< "$changed_files"
-            
-            # Calculate overall coverage for changed files
-            changed_total=$((total_covered + total_missed))
-            if [ $changed_total -gt 0 ]; then
-              changed_percentage=$(awk "BEGIN {printf \"%.2f\", ($total_covered / $changed_total) * 100}")
-              
-              echo "**Coverage:** $changed_percentage%" >> $GITHUB_STEP_SUMMARY
-              echo "- Lines Covered: $total_covered" >> $GITHUB_STEP_SUMMARY
-              echo "- Lines Missed: $total_missed" >> $GITHUB_STEP_SUMMARY
-              echo "- Total Lines: $changed_total" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              
-              # Check if overall coverage meets 80% threshold
-              threshold_check=$(awk "BEGIN {print ($changed_percentage < 80) ? 1 : 0}")
-              if [ "$threshold_check" = "1" ]; then
-                echo "❌ **Build Failed: Changed files coverage ($changed_percentage%) is below minimum threshold of 80%**" >> $GITHUB_STEP_SUMMARY
-                exit 1
-              else
-                echo "✅ **Changed files coverage meets the 80% requirement**" >> $GITHUB_STEP_SUMMARY
-              fi
-            else
-              echo "ℹ️ No coverage data available for changed files" >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "#### Changed Files Coverage" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### Changed Files Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get list of changed Java files
+          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} 2>/dev/null | grep '\.java$' | grep '^backend/server/src/main/' || echo "")
+          
+          if [ -z "$changed_files" ]; then
             echo "ℹ️ No Java files changed in this PR" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          
+          if [ ! -f target/site/jacoco/jacoco.xml ]; then
+            echo "⚠️ Coverage report not found" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          
+          # Initialize totals for aggregate coverage
+          total_covered=0
+          total_missed=0
+          
+          while IFS= read -r file; do
+            if [ -n "$file" ]; then
+              # Convert file path to package format for JaCoCo
+              class_path=$(echo "$file" | sed 's|backend/server/src/main/java/||' | sed 's|\.java$||' | sed 's|/|.|g')
+              class_name=$(echo "$class_path" | sed 's|.*\.||')
+              
+              # Extract coverage for this specific class
+              coverage_line=$(grep -A 5 "name=\"$class_name\"" target/site/jacoco/jacoco.xml 2>/dev/null | grep 'type="LINE"' | head -1 || echo "")
+              
+              if [ -n "$coverage_line" ]; then
+                file_missed=$(echo "$coverage_line" | grep -oP 'missed="\K[0-9]+' 2>/dev/null || echo "0")
+                file_covered=$(echo "$coverage_line" | grep -oP 'covered="\K[0-9]+' 2>/dev/null || echo "0")
+                
+                # Add to aggregate totals
+                total_covered=$((total_covered + file_covered))
+                total_missed=$((total_missed + file_missed))
+              fi
+            fi
+          done <<< "$changed_files"
+          
+          # Calculate overall coverage for changed files
+          changed_total=$((total_covered + total_missed))
+          if [ $changed_total -eq 0 ]; then
+            echo "ℹ️ No coverage data available for changed files" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          
+          changed_percentage=$(awk "BEGIN {printf \"%.2f\", ($total_covered / $changed_total) * 100}")
+          
+          echo "**Coverage:** $changed_percentage%" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines Covered: $total_covered" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines Missed: $total_missed" >> $GITHUB_STEP_SUMMARY
+          echo "- Total Lines: $changed_total" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if overall coverage meets 80% threshold
+          threshold_check=$(awk "BEGIN {print ($changed_percentage < 80) ? 1 : 0}")
+          if [ "$threshold_check" = "1" ]; then
+            echo "❌ **Build Failed: Changed files coverage ($changed_percentage%) is below minimum threshold of 80%**" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ **Changed files coverage meets the 80% requirement**" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -192,19 +207,26 @@ jobs:
           retention-days: 30
 
       - name: Checkstyle summary
-        if: always()
+        if: success()
         run: |
-          if [ -f target/checkstyle/checkstyle-report.xml ]; then
-            violations=$(grep -c '<error' target/checkstyle/checkstyle-report.xml || echo "0")
-            echo "### 🎨 Checkstyle Report" >> $GITHUB_STEP_SUMMARY
+          set +e  # Don't exit on error
+          
+          echo "### 🎨 Checkstyle Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ ! -f target/checkstyle/checkstyle-report.xml ]; then
+            echo "⚠️ Checkstyle report not found" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+          
+          violations=$(grep -c '<error' target/checkstyle/checkstyle-report.xml 2>/dev/null || echo "0")
+          
+          if [ "$violations" -eq "0" ]; then
+            echo "✅ No Checkstyle violations found!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Found $violations Checkstyle violations" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            if [ "$violations" -eq "0" ]; then
-              echo "✅ No Checkstyle violations found!" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "⚠️ Found $violations Checkstyle violations" >> $GITHUB_STEP_SUMMARY
-              echo "" >> $GITHUB_STEP_SUMMARY
-              echo "📄 Download the full report from the workflow artifacts." >> $GITHUB_STEP_SUMMARY
-            fi
+            echo "📄 Download the full report from the workflow artifacts." >> $GITHUB_STEP_SUMMARY
           fi
 
   required-status-check:
