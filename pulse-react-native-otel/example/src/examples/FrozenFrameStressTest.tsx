@@ -82,7 +82,7 @@ const AnimatedBox = ({ index }: { index: number }) => {
     );
     anim.start();
     return () => anim.stop();
-  }, []);
+  }, [rotate, scale, translateX, translateY]);
 
   const rotation = rotate.interpolate({
     inputRange: [0, 1],

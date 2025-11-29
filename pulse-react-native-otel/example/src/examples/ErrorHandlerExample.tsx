@@ -62,7 +62,7 @@ export default function ErrorHandlerDemo() {
         text: 'Crash',
         style: 'destructive',
         onPress: () => {
-          const span = Pulse.startSpan('unhandled_error_with_span');
+          Pulse.startSpan('unhandled_error_with_span');
           console.log('[ErrorDemo] Span started, will crash in 500ms');
 
           setTimeout(() => {

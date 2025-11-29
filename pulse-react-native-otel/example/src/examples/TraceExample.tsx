@@ -90,15 +90,6 @@ const createNestedSpans = async () => {
   // End parent span
   parentSpan.end();
   console.log(`${TAG} Parent span ended - nested spans demo complete`);
-
-  alert(
-    'Nested spans created! Check your telemetry backend to see the hierarchy:\n\n' +
-      'parent_operation\n' +
-      '  ├─ child_fetch_data\n' +
-      '  ├─ child_process_data\n' +
-      '  │   └─ grandchild_validate\n' +
-      '  └─ child_save_results'
-  );
 };
 
 export default function TraceDemo() {
