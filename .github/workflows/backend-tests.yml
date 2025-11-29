@@ -97,15 +97,21 @@ jobs:
           path: backend/server/target/checkstyle/checkstyle-report.xml
           retention-days: 30
 
-      - name: Review Checkstyle violations on PR
-        if: github.event_name == 'pull_request' && always()
-        uses: reviewdog/action-checkstyle@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          checkstyle_file: backend/server/target/checkstyle/checkstyle-report.xml
-          reporter: github-pr-review
-          level: warning
-          fail_on_error: false
+      - name: Checkstyle summary
+        if: always()
+        run: |
+          if [ -f target/checkstyle/checkstyle-report.xml ]; then
+            violations=$(grep -c '<error' target/checkstyle/checkstyle-report.xml || echo "0")
+            echo "### 🎨 Checkstyle Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            if [ "$violations" -eq "0" ]; then
+              echo "✅ No Checkstyle violations found!" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ Found $violations Checkstyle violations" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "📄 Download the full report from the workflow artifacts." >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
 
   required-status-check:
     permissions:
