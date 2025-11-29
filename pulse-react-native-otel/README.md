@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📱 Pulse React Native SDK
+# Pulse React Native SDK
 
 **Production-grade observability for React Native applications**
 
@@ -14,9 +14,21 @@
 
 ---
 
+## ✨ Key Features
+
+- **🚨 Error Monitoring** - Capture JavaScript crashes and exceptions with full stack traces
+- **⚡ Performance Monitoring** - Distributed tracing spans for synchronous and asynchronous operations
+- **🌐 Network Monitoring** - Auto-instrument HTTP requests (fetch and XMLHttpRequest) with zero code changes
+- **🧭 Navigation Tracking** - Automatic screen transition monitoring with React Navigation integration
+- **📊 Event Tracking** - Log custom business events and user actions with structured metadata
+- **🔌 OpenTelemetry Native** - Built on OpenTelemetry Android SDK. Automatically captures ANR, frozen frames, lifecycle events, and more
+- **🏗️ Architecture Support** - Supports both React Native Old Architecture and New Architecture out of the box
+
+---
+
 ## 📚 Documentation
 
-Complete documentation is available at **[https://pulse.horizonos.in/docs/sdk/react-native](https://pulse.horizonos.in/docs/sdk/react-native/overview)**.
+Complete documentation is available at **[pulse.horizonos.in](https://pulse.horizonos.in/docs/sdk/react-native/overview)**.
 
 ### Getting Started
 - [Overview](https://pulse.horizonos.in/docs/sdk/react-native/overview) - Introduction and key features
@@ -33,25 +45,6 @@ Complete documentation is available at **[https://pulse.horizonos.in/docs/sdk/re
 ### Configuration
 - [Global Attributes](https://pulse.horizonos.in/docs/sdk/react-native/global-attributes) - Set attributes for all telemetry
 - [User Identification](https://pulse.horizonos.in/docs/sdk/react-native/user-identification) - Associate telemetry with users
-
----
-
-## ✨ Key Features
-
-- **🚨 Error Monitoring** - Capture JavaScript crashes and exceptions with full stack traces
-- **⚡ Performance Monitoring** - Distributed tracing spans for synchronous and asynchronous operations
-- **🌐 Network Monitoring** - Auto-instrument HTTP requests (fetch and XMLHttpRequest) with zero code changes
-- **🧭 Navigation Tracking** - Automatic screen transition monitoring with React Navigation integration
-- **📊 Event Tracking** - Log custom business events and user actions with structured metadata
-- **🔌 OpenTelemetry Native** - Built on OpenTelemetry Android SDK. Automatically captures ANR, frozen frames, lifecycle events, and more
-- **🏗️ Architecture Support** - Supports both React Native Old Architecture and New Architecture out of the box
-
----
-
-## 🔗 Related Documentation
-
-- [Android SDK](../pulse-android-otel/README.md) - Native Android SDK documentation
-- [Main Documentation](https://pulse.horizonos.in/docs/intro) - Complete Pulse platform documentation
 
 ---
 
