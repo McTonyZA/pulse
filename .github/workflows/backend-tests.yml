@@ -87,29 +87,36 @@ jobs:
             exit 0
           fi
           
-          # Parse using sed (more portable than grep -oP)
-          missed=$(sed -n 's/.*type="LINE".*missed="\([0-9]*\)".*/\1/p' target/site/jacoco/jacoco.xml | head -1)
-          covered=$(sed -n 's/.*type="LINE".*covered="\([0-9]*\)".*/\1/p' target/site/jacoco/jacoco.xml | head -1)
+          # Sum up all LINE counters for total project coverage
+          total_missed=0
+          total_covered=0
           
-          if [ -z "$missed" ] || [ -z "$covered" ]; then
-            echo "⚠️ Unable to parse coverage data" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
+          # Extract all LINE type counters and sum them
+          while read -r line; do
+            if [ -n "$line" ]; then
+              missed=$(echo "$line" | sed -n 's/.*missed="\([0-9]*\)".*/\1/p')
+              covered=$(echo "$line" | sed -n 's/.*covered="\([0-9]*\)".*/\1/p')
+              
+              if [ -n "$missed" ] && [ -n "$covered" ]; then
+                total_missed=$((total_missed + missed))
+                total_covered=$((total_covered + covered))
+              fi
+            fi
+          done < <(grep 'type="LINE"' target/site/jacoco/jacoco.xml)
           
-          total=$((missed + covered))
-          if [ $total -eq 0 ]; then
+          if [ $total_missed -eq 0 ] && [ $total_covered -eq 0 ]; then
             echo "⚠️ No coverage data available" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
           
-          percentage=$(awk "BEGIN {printf \"%.2f\", ($covered / $total) * 100}")
+          total=$((total_covered + total_missed))
+          percentage=$(awk "BEGIN {printf \"%.2f\", ($total_covered / $total) * 100}")
           
           echo "#### Overall Coverage" >> $GITHUB_STEP_SUMMARY
           echo "**Coverage:** $percentage%" >> $GITHUB_STEP_SUMMARY
-          echo "- Lines Covered: $covered" >> $GITHUB_STEP_SUMMARY
-          echo "- Lines Missed: $missed" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines Covered: $total_covered" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines Missed: $total_missed" >> $GITHUB_STEP_SUMMARY
           echo "- Total Lines: $total" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
