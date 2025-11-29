@@ -79,13 +79,13 @@ jobs:
         run: |
           if [ -f target/site/jacoco/jacoco.xml ]; then
             # Parse overall coverage from JaCoCo XML
-            missed=$(grep -oP 'type="LINE".*?missed="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
-            covered=$(grep -oP 'type="LINE".*?covered="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
+            missed=$(grep -oP 'type="LINE".*?missed="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1 || echo "0")
+            covered=$(grep -oP 'type="LINE".*?covered="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1 || echo "0")
             
             echo "### 📊 Code Coverage Report" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            if [ -n "$missed" ] && [ -n "$covered" ]; then
+            if [ -n "$missed" ] && [ -n "$covered" ] && [ "$missed" != "0" -o "$covered" != "0" ]; then
               total=$((missed + covered))
               if [ $total -gt 0 ]; then
                 percentage=$(awk "BEGIN {printf \"%.2f\", ($covered / $total) * 100}")
@@ -98,8 +98,9 @@ jobs:
                 echo "" >> $GITHUB_STEP_SUMMARY
                 
                 # Check if coverage meets minimum threshold (35%)
-                if (( $(echo "$percentage < 35" | bc -l) )); then
-                  echo "❌ **Build Failed: Overall coverage is below minimum threshold of 35%**" >> $GITHUB_STEP_SUMMARY
+                threshold_check=$(awk "BEGIN {print ($percentage < 35) ? 1 : 0}")
+                if [ "$threshold_check" = "1" ]; then
+                  echo "❌ **Build Failed: Overall coverage ($percentage%) is below minimum threshold of 35%**" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
                   exit 1
                 else
@@ -107,7 +108,13 @@ jobs:
                   echo "" >> $GITHUB_STEP_SUMMARY
                 fi
               fi
+            else
+              echo "⚠️ Unable to parse coverage data from jacoco.xml" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
             fi
+          else
+            echo "⚠️ Coverage report not found at target/site/jacoco/jacoco.xml" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Changed files coverage
@@ -159,7 +166,8 @@ jobs:
               echo "" >> $GITHUB_STEP_SUMMARY
               
               # Check if overall coverage meets 80% threshold
-              if (( $(echo "$changed_percentage < 80" | bc -l) )); then
+              threshold_check=$(awk "BEGIN {print ($changed_percentage < 80) ? 1 : 0}")
+              if [ "$threshold_check" = "1" ]; then
                 echo "❌ **Build Failed: Changed files coverage ($changed_percentage%) is below minimum threshold of 80%**" >> $GITHUB_STEP_SUMMARY
                 exit 1
               else
