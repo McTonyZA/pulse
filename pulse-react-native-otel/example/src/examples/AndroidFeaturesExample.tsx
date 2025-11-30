@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, Button, Alert, Platform, ScrollView } from 'react-native';
 import PulseReactNativeOtel from '../../../src/NativePulseReactNativeOtel';
 import FrozenFrameStressTest from './FrozenFrameStressTest';
-import NativeNetworkModule from '../modules/NativeNetworkModule';
+import NativePulseExampleModule from '../specs/NativePulseExampleModule';
 
 export default function AndroidFeaturesExample() {
   const [showStressTest, setShowStressTest] = useState(false);
@@ -31,7 +31,7 @@ export default function AndroidFeaturesExample() {
 
   // Native Android OkHttp GET request
   const testNativeGet = async () => {
-    if (Platform.OS !== 'android' || !NativeNetworkModule) {
+    if (Platform.OS !== 'android' || !NativePulseExampleModule) {
       Alert.alert('Not Available', 'Native network module is only available on Android');
       return;
     }
@@ -39,7 +39,7 @@ export default function AndroidFeaturesExample() {
     setLoading('native-get');
     try {
       console.log('[Pulse Network] 🤖 [Native Android] Making OkHttp GET request...');
-      const result = await NativeNetworkModule.makeGetRequest('https://jsonplaceholder.typicode.com/posts/1');
+      const result = await NativePulseExampleModule.makeGetRequest('https://jsonplaceholder.typicode.com/posts/1');
       const data = JSON.parse(result.body);
       Alert.alert('Success', `Native GET: ${data.title} (Status: ${result.status})`);
     } catch (error: any) {
@@ -51,7 +51,7 @@ export default function AndroidFeaturesExample() {
 
   // Native Android OkHttp POST request
   const testNativePost = async () => {
-    if (Platform.OS !== 'android' || !NativeNetworkModule) {
+    if (Platform.OS !== 'android' || !NativePulseExampleModule  ) {
       Alert.alert('Not Available', 'Native network module is only available on Android');
       return;
     }
@@ -64,7 +64,7 @@ export default function AndroidFeaturesExample() {
         body: 'This is a test POST request from native OkHttp',
         userId: 1,
       });
-      const result = await NativeNetworkModule.makePostRequest(
+      const result = await NativePulseExampleModule.makePostRequest(
         'https://jsonplaceholder.typicode.com/posts',
         postBody
       );
@@ -115,7 +115,7 @@ export default function AndroidFeaturesExample() {
         </View>
       </View>
 
-      {Platform.OS === 'android' && NativeNetworkModule && (
+      {Platform.OS === 'android' && NativePulseExampleModule && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Native Network (OkHttp)</Text>
           

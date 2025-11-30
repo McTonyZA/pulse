@@ -1,20 +1,19 @@
 package pulsereactnativeotel.example
 
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import com.facebook.react.module.annotations.ReactModule
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import java.io.IOException
 
-class NativeNetworkModule(reactContext: ReactApplicationContext) :
-    ReactContextBaseJavaModule(reactContext) {
+@ReactModule(name = NativePulseExampleModule.NAME)
+class NativePulseExampleModule(reactContext: ReactApplicationContext) : NativePulseExampleModuleSpec(reactContext) {
 
     private val client = OkHttpClient()
 
@@ -23,11 +22,10 @@ class NativeNetworkModule(reactContext: ReactApplicationContext) :
     }
 
     companion object {
-        const val NAME = "NativeNetworkModule"
+        const val NAME = "NativePulseExampleModule"
     }
 
-    @ReactMethod
-    fun makeGetRequest(url: String, promise: Promise) {
+    override fun makeGetRequest(url: String, promise: Promise) {
         Thread {
             try {
                 val request = Request.Builder()
@@ -40,7 +38,7 @@ class NativeNetworkModule(reactContext: ReactApplicationContext) :
                 val result = Arguments.createMap().apply {
                     putInt("status", response.code)
                     putString("body", responseBody)
-                    
+
                     val headersMap = Arguments.createMap()
                     response.headers.forEach { header ->
                         val values = Arguments.createArray()
@@ -61,8 +59,7 @@ class NativeNetworkModule(reactContext: ReactApplicationContext) :
         }.start()
     }
 
-    @ReactMethod
-    fun makePostRequest(url: String, body: String, promise: Promise) {
+    override fun makePostRequest(url: String, body: String, promise: Promise) {
         Thread {
             try {
                 val mediaType = "application/json; charset=utf-8".toMediaType()
@@ -79,7 +76,7 @@ class NativeNetworkModule(reactContext: ReactApplicationContext) :
                 val result = Arguments.createMap().apply {
                     putInt("status", response.code)
                     putString("body", responseBody)
-                    
+
                     val headersMap = Arguments.createMap()
                     response.headers.forEach { header ->
                         val values = Arguments.createArray()

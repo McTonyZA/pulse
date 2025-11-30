@@ -10,10 +10,10 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.pulse.android.sdk.PulseSDK
-import pulsereactnativeotel.example.NativeNetworkPackage
 import io.opentelemetry.android.instrumentation.AndroidInstrumentationLoader
 import io.opentelemetry.instrumentation.library.okhttp.v3_0.OkHttpInstrumentation
 import android.util.Log
+import pulsereactnativeotel.example.NativePulseExamplePackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -22,7 +22,7 @@ class MainApplication : Application(), ReactApplication {
         override fun getPackages(): List<ReactPackage> =
           PackageList(this).packages.apply {
             // Add native network module for testing native OkHttp calls
-            add(NativeNetworkPackage())
+            add(NativePulseExamplePackage())
           }
 
         override fun getJSMainModuleName(): String = "index"
@@ -44,7 +44,7 @@ class MainApplication : Application(), ReactApplication {
     } catch (e: Exception) {
       Log.w("MainApplication", "OkHttp instrumentation not available: ${e.message}")
     }
-    
+
     PulseSDK.INSTANCE.initialize(this, "http://10.0.2.2:4318") {
       interaction {
         enabled(true)

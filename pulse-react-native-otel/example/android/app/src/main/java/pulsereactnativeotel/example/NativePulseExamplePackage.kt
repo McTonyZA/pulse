@@ -8,10 +8,10 @@ import com.facebook.react.module.model.ReactModuleInfoProvider
 import com.facebook.react.uimanager.ViewManager
 import java.util.HashMap
 
-class NativeNetworkPackage : BaseReactPackage() {
+class NativePulseExamplePackage : BaseReactPackage() {
     override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
-        return if (name == NativeNetworkModule.NAME) {
-            NativeNetworkModule(reactContext)
+        return if (name == NativePulseExampleModule.NAME) {
+            NativePulseExampleModule(reactContext)
         } else {
             null
         }
@@ -20,13 +20,13 @@ class NativeNetworkPackage : BaseReactPackage() {
     override fun getReactModuleInfoProvider(): ReactModuleInfoProvider {
         return ReactModuleInfoProvider {
             val moduleInfos: MutableMap<String, ReactModuleInfo> = HashMap()
-            moduleInfos[NativeNetworkModule.NAME] = ReactModuleInfo(
-                NativeNetworkModule.NAME,
-                NativeNetworkModule.NAME,
+            moduleInfos[NativePulseExampleModule.NAME] = ReactModuleInfo(
+                NativePulseExampleModule.NAME,
+                NativePulseExampleModule.NAME,
                 false,  // canOverrideExistingModule
                 false,  // needsEagerInit
                 false,  // isCxxModule
-                false   // isTurboModule - using legacy module for compatibility
+                true   // isTurboModule - using legacy module for compatibility
             )
             moduleInfos
         }
