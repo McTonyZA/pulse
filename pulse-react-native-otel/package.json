@@ -54,15 +54,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ds-horizon/pulse.git",
+    "url": "git+https://github.com/dream-horizon-org/pulse.git",
     "directory": "pulse-react-native-otel"
   },
-  "author": "HorizonOS <https://horizonos.in>",
+  "author": "DreamHorizon <https://dreamhorizon.org>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ds-horizon/pulse/issues"
+    "url": "https://github.com/dream-horizon-org/pulse/issues"
   },
-  "homepage": "https://github.com/ds-horizon/pulse/tree/main/pulse-react-native-otel#readme",
+  "homepage": "https://github.com/dream-horizon-org/pulse/tree/main/pulse-react-native-otel#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
