@@ -60,62 +60,48 @@ jobs:
           reporter: java-junit
           fail-on-error: true
 
-      - name: Code coverage summary
-        if: success()
-        run: |
-          python3 << 'EOF'
-          import xml.etree.ElementTree as ET
-          import os
-          import sys
-
-          try:
-              tree = ET.parse('target/site/jacoco/jacoco.xml')
-              root = tree.getroot()
-
-              counter = root.find("./counter[@type='LINE']")
-
-              if counter is not None:
-                  missed = int(counter.get('missed', 0))
-                  covered = int(counter.get('covered', 0))
-                  total = missed + covered
-
-                  if total > 0:
-                      percentage = (covered / total) * 100
-
-                      with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
-                          f.write('### 📊 Code Coverage Report\n\n')
-                          f.write('#### Overall Coverage\n')
-                          f.write(f'**Coverage:** {percentage:.2f}%\n')
-                          f.write(f'- Lines Covered: {covered}\n')
-                          f.write(f'- Lines Missed: {missed}\n')
-                          f.write(f'- Total Lines: {total}\n\n')
-
-                          if percentage < 35:
-                              f.write(f'❌ **Build Failed: Overall coverage ({percentage:.2f}%) is below minimum threshold of 35%**\n\n')
-                              sys.exit(1)
-                          else:
-                              f.write('✅ Coverage meets minimum threshold of 35%\n\n')
-                  else:
-                      with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
-                          f.write('### 📊 Code Coverage Report\n\n')
-                          f.write('⚠️ No coverage data available\n\n')
-              else:
-                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
-                      f.write('### 📊 Code Coverage Report\n\n')
-                      f.write('⚠️ LINE counter not found in report\n\n')
-          except Exception as e:
-              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
-                  f.write('### 📊 Code Coverage Report\n\n')
-                  f.write(f'⚠️ Unable to parse coverage data: {str(e)}\n\n')
-          EOF
-
-      - name: Check overall coverage via JaCoCo XML
+      - name: Overall coverage (JaCoCo XML)
         if: success()
         working-directory: backend/server
         run: |
-          python3 $GITHUB_WORKSPACE/.github/scripts/check_backend_coverage.py \
+          python3 $GITHUB_WORKSPACE/.github/scripts/check_backend_coverage_overall.py \
             --report target/site/jacoco/jacoco.xml \
             --min-line 35
+      - name: Changed files coverage (JaCoCo XML)
+        if: success()
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_SHA: ${{ github.sha }}
+        working-directory: backend/server
+        run: |
+          set -euo pipefail
+          if [ "${EVENT_NAME}" = "pull_request" ] || [ "${EVENT_NAME}" = "pull_request_target" ]; then
+            compare_range="${BASE_SHA}...${HEAD_SHA}"
+          else
+            compare_range="${PUSH_BEFORE}..${PUSH_SHA}"
+          fi
+
+          tmp_changed="$RUNNER_TEMP/changed_files.txt"
+          git fetch --no-tags --depth=100 origin ${BASE_SHA} ${HEAD_SHA} ${PUSH_BEFORE} ${PUSH_SHA} || true
+          git diff --name-only --diff-filter=ACMR ${compare_range} \
+            | grep -E '^backend/server/src/main/java/.*\.java$' > "$tmp_changed" || true
+
+          echo "Changed files:" >&2; cat "$tmp_changed" >&2 || true
+
+          if [ ! -s "$tmp_changed" ]; then
+            echo "ℹ️ No Java files changed under backend/server/src/main/java" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          python3 $GITHUB_WORKSPACE/.github/scripts/check_backend_coverage_changed.py \
+            --report target/site/jacoco/jacoco.xml \
+            --changed-files "$tmp_changed" \
+            --src-root backend/server/src/main/java \
+            --min-line 80
       - name: Checkstyle summary
         if: always()
         run: |
