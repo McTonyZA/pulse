@@ -126,19 +126,34 @@ jobs:
           EOF
 
       - name: Changed files coverage
-        if: github.event_name == 'pull_request' && success()
+        if: success()
         run: |
           echo "#### Changed Files Coverage" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          # Get list of changed Java files
-          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} 2>/dev/null | grep '\.java$' | grep '^backend/server/src/main/' || echo "")
+          # Get list of changed Java files (works for both PR and push)
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # For PRs, compare base and head
+            changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} 2>/dev/null | grep '\.java$' | grep 'backend/server/src/main/' || echo "")
+          else
+            # For push events, compare with previous commit
+            changed_files=$(git diff --name-only HEAD~1 HEAD 2>/dev/null | grep '\.java$' | grep 'backend/server/src/main/' || echo "")
+          fi
+          
+          # Debug: Show what files were detected
+          echo "DEBUG: Changed files detected:" >&2
+          echo "$changed_files" >&2
           
           if [ -z "$changed_files" ]; then
-            echo "ℹ️ No Java files changed in this PR" >> $GITHUB_STEP_SUMMARY
+            echo "ℹ️ No Java files changed" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
+          
+          # Count changed files
+          file_count=$(echo "$changed_files" | wc -l)
+          echo "**Files Analyzed:** $file_count Java file(s)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ ! -f target/site/jacoco/jacoco.xml ]; then
             echo "⚠️ Coverage report not found" >> $GITHUB_STEP_SUMMARY
