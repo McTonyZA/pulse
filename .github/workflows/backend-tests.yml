@@ -31,14 +31,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # IMPORTANT: fetch full history so base/head SHAs exist
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
-          cache: 'maven'
+          cache: maven
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -50,22 +50,6 @@ jobs:
 
       - name: Run tests with coverage
         run: mvn clean verify
-
-#      - name: Upload test results
-#        if: always()
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: test-results
-#          path: backend/server/target/surefire-reports/
-#          retention-days: 30
-#
-#      - name: Upload coverage report
-#        if: always()
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: coverage-report
-#          path: backend/server/target/site/jacoco/
-#          retention-days: 30
 
       - name: Publish test report
         if: always()
@@ -83,23 +67,21 @@ jobs:
           import xml.etree.ElementTree as ET
           import os
           import sys
-          
+
           try:
               tree = ET.parse('target/site/jacoco/jacoco.xml')
               root = tree.getroot()
-              
-              # Get ONLY the direct child counter of the report element (aggregate)
-              # This is the true overall coverage, not package/class/method level
+
               counter = root.find("./counter[@type='LINE']")
-              
+
               if counter is not None:
                   missed = int(counter.get('missed', 0))
                   covered = int(counter.get('covered', 0))
                   total = missed + covered
-                  
+
                   if total > 0:
                       percentage = (covered / total) * 100
-                      
+
                       with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
                           f.write('### 📊 Code Coverage Report\n\n')
                           f.write('#### Overall Coverage\n')
@@ -107,7 +89,7 @@ jobs:
                           f.write(f'- Lines Covered: {covered}\n')
                           f.write(f'- Lines Missed: {missed}\n')
                           f.write(f'- Total Lines: {total}\n\n')
-                          
+
                           if percentage < 35:
                               f.write(f'❌ **Build Failed: Overall coverage ({percentage:.2f}%) is below minimum threshold of 35%**\n\n')
                               sys.exit(1)
@@ -129,43 +111,56 @@ jobs:
 
       - name: Changed files coverage
         if: success()
+        shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_SHA: ${{ github.sha }}
         run: |
+          set -euo pipefail
+
           echo "#### Changed Files Coverage" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
           echo "Event: $EVENT_NAME" >&2
-          echo "BASE_SHA: $BASE_SHA" >&2
-          echo "HEAD_SHA: $HEAD_SHA" >&2
+          echo "BASE_SHA: ${BASE_SHA:-<nil>}" >&2
+          echo "HEAD_SHA: ${HEAD_SHA:-<nil>}" >&2
+          echo "PUSH_BEFORE: ${PUSH_BEFORE:-<nil>}" >&2
+          echo "PUSH_SHA: ${PUSH_SHA:-<nil>}" >&2
 
-          # Make sure both SHAs are present locally (in case fetch-depth was small)
-          git fetch --no-tags --depth=100 origin "$BASE_SHA" "$HEAD_SHA" 2>&1 || true
+          # Ensure the SHAs exist locally
+          git fetch --no-tags --depth=100 origin "${BASE_SHA}" "${HEAD_SHA}" || true
 
-          echo "Comparing: $BASE_SHA...$HEAD_SHA" >&2
+          # Build compare range
+          if [ "${EVENT_NAME}" = "pull_request" ] || [ "${EVENT_NAME}" = "pull_request_target" ]; then
+            compare_range="${BASE_SHA}...${HEAD_SHA}"
+            echo "Comparing (PR): ${compare_range}" >&2
+          else
+            git fetch --no-tags --depth=100 origin "${PUSH_BEFORE}" "${PUSH_SHA}" || true
+            compare_range="${PUSH_BEFORE}..${PUSH_SHA}"
+            echo "Comparing (push): ${compare_range}" >&2
+          fi
 
-          # Get changed Java files under backend/server/src/main
-          # (don't hide errors completely – they help a lot)
-          changed_files=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" 2>&1 | tee /dev/stderr | grep '\.java$' | grep 'backend/server/src/main/' || true)
+          # Detect changed Java files under backend path
+          changed_files=$(git diff --name-only --diff-filter=ACMR ${compare_range} 2>&1             | tee /dev/stderr             | grep -E '^backend/server/src/main/java/.*\.java$' || true)
 
           echo "DEBUG: Changed files detected:" >&2
-          echo "$changed_files" >&2
+          echo "${changed_files}" >&2
 
-          if [ -z "$changed_files" ]; then
-            echo "ℹ️ No Java files changed under backend/server/src/main" >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "${changed_files}" ]; then
+            echo "ℹ️ No Java files changed under backend/server/src/main/java" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          # Count changed files
-          file_count=$(echo "$changed_files" | wc -l)
-          echo "**Files Analyzed:** $file_count Java file(s)" >> "$GITHUB_STEP_SUMMARY"
+          file_count=$(echo "${changed_files}" | wc -l | awk '{print $1}')
+          echo "**Files Analyzed:** ${file_count} Java file(s)" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
           if [ ! -f target/site/jacoco/jacoco.xml ]; then
-            echo "⚠️ Coverage report not found" >> "$GITHUB_STEP_SUMMARY"
+            echo "⚠️ Coverage report not found at target/site/jacoco/jacoco.xml" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
@@ -174,48 +169,59 @@ jobs:
           total_missed=0
 
           while IFS= read -r file; do
-            if [ -n "$file" ]; then
-              class_path=$(echo "$file" | sed 's|backend/server/src/main/java/||' | sed 's|\.java$||' | sed 's|/|.|g')
-              class_name=$(echo "$class_path" | sed 's|.*\.||')
+            [ -z "$file" ] && continue
 
-              coverage_line=$(grep -A 5 "name=\"$class_name\"" target/site/jacoco/jacoco.xml 2>/dev/null | grep 'type="LINE"' | head -1 || echo "")
+            # Relative path within src/main/java
+            rel_path=$(echo "$file" | sed 's|^backend/server/src/main/java/||')
+            pkg_dir=$(dirname "$rel_path")
+            src_file=$(basename "$rel_path")
 
-              if [ -n "$coverage_line" ]; then
-                file_missed=$(echo "$coverage_line" | sed -n 's/.*missed="\([0-9]*\)".*/\1/p')
-                file_covered=$(echo "$coverage_line" | sed -n 's/.*covered="\([0-9]*\)".*/\1/p')
+            # Execute awk and read its two numbers (missed, covered)
+            read -r pkg_missed pkg_covered <<< "$(awk -v p="$pkg_dir" -v s="$src_file" '
+              BEGIN { inpkg=0; inclass=0; missed=0; covered=0; }
+              /<package / { inpkg=0; if ($0 ~ "name="" p """) inpkg=1 }
+              inpkg && /<class / && $0 ~ "sourcefilename="" s """ { inclass=1; next }
+              inpkg && inclass && /<counter / && /type="LINE"/ {
+                if (match($0, /missed="([0-9]+)"/, m)) missed += m[1]
+                if (match($0, /covered="([0-9]+)"/, c)) covered += c[1]
+                inclass=0
+              }
+              inpkg && /<\/package>/ { inpkg=0 }
+              END { printf "%d %d\n", missed, covered }
+            ' target/site/jacoco/jacoco.xml)"
 
-                if [ -n "$file_missed" ]; then
-                  total_missed=$((total_missed + file_missed))
-                fi
-                if [ -n "$file_covered" ]; then
-                  total_covered=$((total_covered + file_covered))
-                fi
-              fi
+            if [ -n "${pkg_missed:-}" ] && [ -n "${pkg_covered:-}" ]; then
+              echo "COVERAGE for ${rel_path}  ->  missed=${pkg_missed} covered=${pkg_covered}" >&2
+              total_missed=$((total_missed + pkg_missed))
+              total_covered=$((total_covered + pkg_covered))
+            else
+              echo "NOTE: No JaCoCo LINE counters found for ${pkg_dir}/${src_file}" >&2
             fi
-          done <<< "$changed_files"
+          done <<< "${changed_files}"
 
           changed_total=$((total_covered + total_missed))
-          if [ "$changed_total" -eq 0 ]; then
+          if [ "${changed_total}" -eq 0 ]; then
             echo "ℹ️ No coverage data available for changed files" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          changed_percentage=$(awk "BEGIN {printf \"%.2f\", ($total_covered / $changed_total) * 100}")
+          changed_percentage=$(awk "BEGIN {printf "%.2f", (${total_covered} / ${changed_total}) * 100}")
 
-          echo "**Coverage:** $changed_percentage%" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Lines Covered: $total_covered" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Lines Missed: $total_missed" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Total Lines: $changed_total" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Coverage:** ${changed_percentage}%" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Lines Covered: ${total_covered}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Lines Missed: ${total_missed}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Total Lines: ${changed_total}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          threshold_check=$(awk "BEGIN {print ($changed_percentage < 80) ? 1 : 0}")
-          if [ "$threshold_check" = "1" ]; then
-            echo "❌ **Build Failed: Changed files coverage ($changed_percentage%) is below minimum threshold of 80%**" >> "$GITHUB_STEP_SUMMARY"
+          threshold_check=$(awk "BEGIN {print (${changed_percentage} < 80) ? 1 : 0}")
+          if [ "${threshold_check}" = "1" ]; then
+            echo "❌ **Build Failed: Changed files coverage (${changed_percentage}%) is below minimum threshold of 80%**" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           else
             echo "✅ Changed files coverage meets the 80% requirement" >> "$GITHUB_STEP_SUMMARY"
           fi
+
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
       #      - name: Upload Checkstyle report
@@ -255,7 +261,5 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - if: |
-          needs.test.result != 'success'
+      - if: needs.test.result != 'success'
         run: exit 1
-
