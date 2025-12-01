@@ -49,21 +49,21 @@ jobs:
       - name: Run tests with coverage
         run: mvn clean verify
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: backend/server/target/surefire-reports/
-          retention-days: 30
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: backend/server/target/site/jacoco/
-          retention-days: 30
+#      - name: Upload test results
+#        if: always()
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: test-results
+#          path: backend/server/target/surefire-reports/
+#          retention-days: 30
+#
+#      - name: Upload coverage report
+#        if: always()
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: coverage-report
+#          path: backend/server/target/site/jacoco/
+#          retention-days: 30
 
       - name: Publish test report
         if: always()
@@ -201,13 +201,13 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload Checkstyle report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: checkstyle-report
-          path: backend/server/target/checkstyle/checkstyle-report.xml
-          retention-days: 30
+#      - name: Upload Checkstyle report
+#        if: always()
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: checkstyle-report
+#          path: backend/server/target/checkstyle/checkstyle-report.xml
+#          retention-days: 30
 
       - name: Checkstyle summary
         if: success()
