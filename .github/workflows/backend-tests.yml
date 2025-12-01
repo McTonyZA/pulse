@@ -67,7 +67,7 @@ jobs:
           python3 $GITHUB_WORKSPACE/.github/scripts/check_backend_coverage_overall.py \
             --report target/site/jacoco/jacoco.xml \
             --min-line 35
-      - name: Changed files coverage (JaCoCo XML)
+      - name: Changed files coverage (full metrics)
         if: success()
         shell: bash
         env:
@@ -85,23 +85,24 @@ jobs:
             compare_range="${PUSH_BEFORE}..${PUSH_SHA}"
           fi
 
-          tmp_changed="$RUNNER_TEMP/changed_files.txt"
+          tmp_changed="$RUNNER_TEMP/changed_java.txt"
           git fetch --no-tags --depth=100 origin ${BASE_SHA} ${HEAD_SHA} ${PUSH_BEFORE} ${PUSH_SHA} || true
           git diff --name-only --diff-filter=ACMR ${compare_range} \
             | grep -E '^backend/server/src/main/java/.*\.java$' > "$tmp_changed" || true
 
           echo "Changed files:" >&2; cat "$tmp_changed" >&2 || true
 
-          if [ ! -s "$tmp_changed" ]; then
-            echo "ℹ️ No Java files changed under backend/server/src/main/java" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
           python3 $GITHUB_WORKSPACE/.github/scripts/check_backend_coverage_changed.py \
             --report target/site/jacoco/jacoco.xml \
             --changed-files "$tmp_changed" \
             --src-root backend/server/src/main/java \
-            --min-line 80
+            --min-line 80 \
+            --min-branch 0 \
+            --min-instruction 0 \
+            --min-method 0 \
+            --min-class 0
+            # add --fail-if-no-changed if you want the job to fail when no data is found
+
       - name: Checkstyle summary
         if: always()
         run: |
