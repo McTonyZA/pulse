@@ -11,19 +11,6 @@ Link issues / discussion / docs if relevant. -->
 - Closes #ISSUE_ID
 - Related: #ANOTHER_ISSUE_ID
 
-## Components Affected
-
-<!-- Tick all that apply -->
-
-- [ ] Backend (`/backend`)
-- [ ] Web UI (`/pulse-ui`)
-- [ ] Android SDK (`/pulse-android-otel`)
-- [ ] React Native SDK (`/pulse-react-native-otel`)
-- [ ] Deploy / Infra (`/deploy`, docker, k8s, etc.)
-- [ ] Docs / Guides
-- [ ] CI / Tooling
-- [ ] Other (please specify):
-
 ## What Changed
 
 <!-- Short, implementation-focused bullets.
