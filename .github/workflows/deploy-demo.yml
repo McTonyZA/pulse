@@ -60,7 +60,7 @@ jobs:
           GENERATE_SOURCEMAP: 'false'
 
       - name: Add CNAME for custom domain
-        run: echo 'pulse.dreamhorizon.org' > build/CNAME
+        run: echo 'demo.pulse-ux.com' > build/CNAME
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
