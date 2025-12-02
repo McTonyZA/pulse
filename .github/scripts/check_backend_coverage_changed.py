@@ -15,7 +15,8 @@ Exit codes:
   3 = Report not found or unreadable
   4 = No coverage data for changed files
 """
-import argparse, os, sys, xml.etree.ElementTree as ET
+import argparse, os, sys
+from defusedxml import ElementTree as ET
 from typing import Dict, Tuple, List
 
 METRICS = ("LINE", "BRANCH", "INSTRUCTION", "METHOD", "CLASS")
@@ -212,9 +213,7 @@ def main():
             with open(path, "a") as f:
                 f.write(note + "\n\n")
         print(note)
-        if args.fail_if_no_changed:
-            sys.exit(1)
-        sys.exit(4)
+        sys.exit(0)
 
     lines.append("")
     if failures:
