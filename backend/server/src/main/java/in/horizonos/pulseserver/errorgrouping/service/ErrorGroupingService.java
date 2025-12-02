@@ -346,12 +346,12 @@ public class ErrorGroupingService {
             case NDK -> st.getNdkTypes();
             default -> List.of();
         };
-//        if (types == null || types.isEmpty()) {
-//            if (!st.getJsTypes().isEmpty()) return st.getJsTypes();
-//            if (!st.getJavaTypes().isEmpty()) return st.getJavaTypes();
-//            if (!st.getNdkFrames().isEmpty()) return st.getNdkTypes();
-//            return List.of();
-//        }
+        if (types == null || types.isEmpty()) {
+            if (!st.getJsTypes().isEmpty()) return st.getJsTypes();
+            if (!st.getJavaTypes().isEmpty()) return st.getJavaTypes();
+            if (!st.getNdkFrames().isEmpty()) return st.getNdkTypes();
+            return List.of();
+        }
         return types;
     }
 

@@ -253,19 +253,19 @@ class ErrorGroupingServiceTest {
             assertEquals(javaTypes, result);
         }
 
-//        @Test
-//        void shouldFallbackToJsTypesWhenPrimaryLaneHasNoTypes() {
-//            List<String> jsTypes = List.of("Error");
-//            ParsedFrames parsed = ParsedFrames.builder()
-//                    .jsTypes(jsTypes)
-//                    .javaTypes(Collections.emptyList())
-//                    .ndkTypes(Collections.emptyList())
-//                    .build();
-//
-//            List<String> result = ErrorGroupingService.typesForPrimary(parsed, Lane.JAVA);
-//
-//            assertEquals(jsTypes, result);
-//        }
+        @Test
+        void shouldFallbackToJsTypesWhenPrimaryLaneHasNoTypes() {
+            List<String> jsTypes = List.of("Error");
+            ParsedFrames parsed = ParsedFrames.builder()
+                    .jsTypes(jsTypes)
+                    .javaTypes(Collections.emptyList())
+                    .ndkTypes(Collections.emptyList())
+                    .build();
+
+            List<String> result = ErrorGroupingService.typesForPrimary(parsed, Lane.JAVA);
+
+            assertEquals(jsTypes, result);
+        }
 
         @Test
         void shouldReturnEmptyListWhenNoTypes() {
