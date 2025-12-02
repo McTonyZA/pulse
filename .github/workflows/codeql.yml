@@ -5,10 +5,14 @@ on:
     branches:
       - main
       - release/*
+    paths:
+      - 'pulse-android-otel/**'
   push:
     branches:
       - main
       - release/*
+    paths:
+      - 'pulse-android-otel/**'
   schedule:
     - cron: "29 13 * * 2"  # weekly at 13:29 UTC on Tuesday
 
