@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>in.horizonos</groupId>
+    <groupId>org.dreamhorizon</groupId>
     <artifactId>pulse-server</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
@@ -11,7 +11,7 @@
 
     <properties>
         <app.name>pulse-server</app.name>
-        <main.class>in.horizonos.pulseserver.MainApplication</main.class>
+        <main.class>org.dreamhorizon.pulseserver.MainApplication</main.class>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <app.release.artifact>/target/pulse-server</app.release.artifact>
         <google.guava.version>25.1-jre</google.guava.version>
@@ -387,8 +387,8 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
-                                        <Main-Class>in.horizonos.pulseserver.MainApplication</Main-Class>
-                                        <Main-Verticle>in.horizonos.pulseserver.verticle.MainVerticle</Main-Verticle>
+                                        <Main-Class>org.dreamhorizon.pulseserver.MainApplication</Main-Class>
+                                        <Main-Verticle>org.dreamhorizon.pulseserver.verticle.MainVerticle</Main-Verticle>
                                         <X-Compile-Source-JDK>17</X-Compile-Source-JDK>
                                         <X-Compile-Target-JDK>17</X-Compile-Target-JDK>
                                     </manifestEntries>
