@@ -244,12 +244,27 @@ export class MockResponseGenerator {
     method: string,
     request: MockRequest,
   ): MockResponse {
-    if (pathname.includes("/authenticate")) {
+    // Handle authentication endpoint
+    if (pathname.includes("/authenticate") && method === "POST") {
+      // Parse request body to check for dummy login token
+      let requestBody: any = {};
+      try {
+        if (request.body) {
+          requestBody = JSON.parse(request.body);
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+
+      // Handle dummy login token (dev-id-token) or any other identifier
+      const identifier = requestBody.identifier || "";
+      const isDummyLogin = identifier === "dev-id-token" || !identifier;
+
       // Create a mock JWT token that can be decoded
       const mockIdToken = this.createMockJWTToken({
-        email: "mock@dream11.com",
-        firstName: "Mock",
-        lastName: "User",
+        email: isDummyLogin ? "dev@dream11.com" : "mock@dream11.com",
+        firstName: isDummyLogin ? "Dev" : "Mock",
+        lastName: isDummyLogin ? "User" : "User",
         profilePicture: "https://via.placeholder.com/150",
       });
 
@@ -266,7 +281,8 @@ export class MockResponseGenerator {
       };
     }
 
-    if (pathname.includes("/refresh")) {
+    // Handle token refresh endpoint
+    if (pathname.includes("/refresh") && method === "POST") {
       // Create a mock JWT token for refresh
       const mockIdToken = this.createMockJWTToken({
         email: "mock@dream11.com",
@@ -282,6 +298,30 @@ export class MockResponseGenerator {
           idToken: mockIdToken,
           tokenType: "Bearer",
           expiresIn: 3600,
+        },
+        status: 200,
+      };
+    }
+
+    // Handle token verify endpoint
+    if (pathname.includes("/token/verify") && method === "GET") {
+      // Check if authorization header is present
+      const authHeader = request.headers?.["authorization"] || 
+                        request.headers?.["Authorization"] || "";
+      
+      // Extract token from "Bearer <token>" format
+      const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+      
+      // Validate token - consider it valid if it's a mock token or starts with "mock_"
+      const isValid = token.length > 0 && (
+        token.startsWith("mock_") || 
+        token.startsWith("Bearer mock_") ||
+        token.includes("access_token")
+      );
+
+      return {
+        data: {
+          isAuthTokenValid: isValid,
         },
         status: 200,
       };
@@ -3039,11 +3079,6 @@ export class MockResponseGenerator {
       const useCaseId = url.searchParams.get("useCaseId");
       const startTime = url.searchParams.get("startTime");
       const endTime = url.searchParams.get("endTime");
-      const _appVersion = url.searchParams.get("appVersion");
-      const _networkProvider = url.searchParams.get("networkProvider");
-      const _osVersion = url.searchParams.get("osVersion");
-      const _platform = url.searchParams.get("platform");
-      const _state = url.searchParams.get("state");
 
       if (this.config.shouldLog()) {
         console.log(
