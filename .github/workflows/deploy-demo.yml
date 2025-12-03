@@ -52,8 +52,8 @@ jobs:
           # Disable Google OAuth (use dummy login)
           REACT_APP_GOOGLE_OAUTH_ENABLED: 'false'
           REACT_APP_GOOGLE_CLIENT_ID: ''
-          # Set public URL for /demo subpath
-          PUBLIC_URL: '/'
+          # Set public URL for /pulse subpath
+          PUBLIC_URL: '/pulse'
           # Production mode
           NODE_ENV: 'production'
           # Disable source maps for smaller bundle
