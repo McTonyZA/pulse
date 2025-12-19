@@ -40,7 +40,7 @@ internal class AnrDetectorTest {
         val openTelemetry: OpenTelemetry = OpenTelemetrySdk.builder().build()
 
         val extractor =
-            EventAttributesExtractor { parentContext: Context, o: Array<StackTraceElement> ->
+            EventAttributesExtractor { _: Context, _: Array<StackTraceElement> ->
                 Attributes.of(AttributeKey.stringKey("test.key"), "abc")
             }
         val anrDetector =
